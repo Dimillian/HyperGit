@@ -1,19 +1,24 @@
 # HyperGit ⚡
 
-> Lightning fast GitHub file search and browser
+> Lightning fast GitHub file search and browser with a sleek dark theme
 
-HyperGit is a beautiful, minimal web frontend that lets you instantly search and view files across all your GitHub repositories. Built for developers who need to quickly find and reference code.
+HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly search and view files across all your GitHub repositories. Built for developers who need to quickly find and reference code with style.
 
 ## ✨ Features
 
 - **@-mention search**: Type `@repo-name/filename` to instantly find files
 - **Two-stage navigation**: Browse repositories → search files within
-- **Syntax highlighting**: Beautiful code display with copy functionality
-- **Keyboard navigation**: Full keyboard support for power users
+- **GitHub OAuth**: One-click authentication with GitHub (or use Personal Access Tokens)
+- **Dark theme**: Sleek black interface with neon purple accents
+- **Syntax highlighting**: Beautiful code display with dark theme syntax highlighting
+- **Keyboard navigation**: Full keyboard support with auto-scrolling
+- **Glass effects**: Shiny, reactive UI with backdrop blur and neon glows
 - **Responsive design**: Works perfectly on desktop and mobile
 - **Private repos**: Access your private repositories securely
 
 ## 🚀 Quick Start
+
+### Option 1: GitHub OAuth (Recommended)
 
 1. **Clone and install**
    ```bash
@@ -22,20 +27,37 @@ HyperGit is a beautiful, minimal web frontend that lets you instantly search and
    npm install
    ```
 
-2. **Start development server**
+2. **Set up GitHub OAuth**
+   - Go to [GitHub Settings → Developer settings → OAuth Apps](https://github.com/settings/developers)
+   - Create a new OAuth App with:
+     - Homepage URL: `http://localhost:3000`
+     - Authorization callback URL: `http://localhost:3000/api/auth/callback`
+   - Copy the Client ID and Client Secret
+
+3. **Configure environment**
    ```bash
-   npm run dev
+   cp .env.example .env.local
+   # Edit .env.local with your GitHub OAuth credentials
    ```
 
-3. **Get a GitHub token**
+4. **Start and use**
+   ```bash
+   npm run dev
+   # Open http://localhost:3000
+   # Click "Sign in with GitHub"
+   # Start searching with @repo-name/filename
+   ```
+
+### Option 2: Personal Access Token
+
+1. **Get a GitHub token**
    - Go to [GitHub Settings → Personal Access Tokens](https://github.com/settings/tokens)
    - Create a new token with `repo` scope
    - Copy the token (starts with `ghp_`)
 
-4. **Login and search**
-   - Open http://localhost:3000
-   - Paste your GitHub token
-   - Start searching with `@repo-name/filename`
+2. **Login manually**
+   - Click "Use Personal Access Token instead"
+   - Paste your token and connect
 
 ## 🎯 How to Use
 
@@ -46,10 +68,10 @@ HyperGit is a beautiful, minimal web frontend that lets you instantly search and
 4. Click any file to view with syntax highlighting
 
 ### Keyboard Shortcuts
-- `↑/↓` - Navigate search results
+- `↑/↓` - Navigate search results (auto-scrolls)
 - `Enter` - Select repository or file
 - `Escape` - Go back or close
-- `Ctrl+C` - Copy file content (when viewing)
+- Copy button in file viewer - Copy file content
 
 ### Example Searches
 - `@my-app` - Find "my-app" repository
@@ -68,31 +90,47 @@ HyperGit is a beautiful, minimal web frontend that lets you instantly search and
 
 ```
 HyperGit/
-├── app/                 # Next.js app router
-│   ├── globals.css     # Global styles
-│   ├── layout.tsx      # Root layout
-│   └── page.tsx        # Main page
-├── components/          # React components
-│   ├── AuthPrompt.tsx  # GitHub token auth
-│   ├── FileViewer.tsx  # File display modal
-│   └── SearchBar.tsx   # Main search interface
-├── hooks/              # Custom React hooks
-│   └── useGitHub.ts    # GitHub API state
-├── lib/                # Utilities
+├── app/                      # Next.js app router
+│   ├── api/auth/            # OAuth API routes
+│   │   ├── github/          # GitHub OAuth initiation
+│   │   └── callback/        # OAuth callback handler
+│   ├── globals.css          # Global styles with dark theme
+│   ├── layout.tsx           # Root layout
+│   └── page.tsx             # Main page
+├── components/              # React components
+│   ├── AuthPrompt.tsx       # GitHub OAuth + token auth
+│   ├── FileViewer.tsx       # File display modal with dark theme
+│   └── SearchBar.tsx        # Main search interface with glass effects
+├── hooks/                   # Custom React hooks
+│   └── useGitHub.ts         # GitHub API state management
+├── lib/                     # Utilities
 │   └── github/
-│       └── api.ts      # GitHub API client
+│       └── api.ts           # GitHub API client
+├── .env.example             # Environment variables template
 └── README.md
 ```
 
 ## 🔧 Configuration
 
-### GitHub Token Requirements
-Your GitHub Personal Access Token needs:
-- `repo` scope for private repository access
-- `public_repo` scope for public repositories (included in `repo`)
-
 ### Environment Variables
-No environment variables required - authentication is handled via browser localStorage.
+
+Create a `.env.local` file with your GitHub OAuth credentials:
+
+```bash
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_random_secret
+```
+
+For production deployment (e.g., Vercel):
+- Update `NEXTAUTH_URL` to your production domain
+- Update your GitHub OAuth app callback URL to match
+- Add all environment variables to your hosting platform
+
+### GitHub Requirements
+- OAuth App with `repo` scope for repository access
+- Or Personal Access Token with `repo` scope (fallback option)
 
 ## 🤝 Contributing
 

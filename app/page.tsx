@@ -76,7 +76,7 @@ export default function Home() {
                   {repositories.slice(0, 6).map((repo) => (
                     <div
                       key={repo.full_name}
-                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover">
+                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover"
                     >
                       <h3 className="font-medium text-[var(--dark-text)] truncate">{repo.name}</h3>
                       <p className="text-sm text-[var(--dark-text-secondary)] mt-1 line-clamp-2">
