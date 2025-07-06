@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
 import { useGitHub } from '@/hooks/useGitHub'
 import { File, ExternalLink, Copy, CheckCircle } from 'lucide-react'
@@ -53,26 +53,26 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
   const language = getFileLanguage(file.name)
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="glass-effect rounded-2xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-[var(--neon-purple)]/30 neon-glow">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--dark-border)]">
           <div className="flex items-center gap-3">
-            <File className="w-5 h-5 text-gray-600" />
+            <File className="w-6 h-6 text-[var(--neon-purple)]" />
             <div>
-              <h2 className="font-semibold text-lg">{file.name}</h2>
-              <p className="text-sm text-gray-600">{repo.full_name}/{file.path}</p>
+              <h2 className="font-semibold text-xl text-[var(--dark-text)]">{file.name}</h2>
+              <p className="text-sm text-[var(--dark-text-secondary)]">{repo.full_name}/{file.path}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
             >
               {copied ? (
                 <>
-                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <CheckCircle className="w-4 h-4 text-green-400" />
                   Copied!
                 </>
               ) : (
@@ -87,7 +87,7 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
               href={`https://github.com/${repo.full_name}/blob/${repo.default_branch}/${file.path}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-[var(--neon-purple)] text-white hover:bg-[var(--neon-purple-bright)] rounded-lg transition-all duration-200 neon-glow-hover"
             >
               <ExternalLink className="w-4 h-4" />
               GitHub
@@ -95,7 +95,7 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
             
             <button
               onClick={onClose}
-              className="ml-2 px-3 py-2 text-gray-500 hover:text-gray-700 text-lg"
+              className="ml-2 px-3 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
             >
               ×
             </button>
@@ -106,24 +106,28 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
         <div className="flex-1 overflow-auto">
           {loading ? (
             <div className="flex items-center justify-center h-32">
-              <div className="text-gray-500">Loading file content...</div>
+              <div className="text-[var(--dark-text-secondary)] flex items-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[var(--neon-purple)]"></div>
+                Loading file content...
+              </div>
             </div>
           ) : error ? (
             <div className="flex items-center justify-center h-32">
-              <div className="text-red-500">Error: {error}</div>
+              <div className="text-red-400">Error: {error}</div>
             </div>
           ) : (
             <SyntaxHighlighter
               language={language}
-              style={oneLight}
+              style={oneDark}
               showLineNumbers
               wrapLines
               customStyle={{
                 margin: 0,
-                padding: '1rem',
-                background: 'transparent',
+                padding: '1.5rem',
+                background: 'var(--dark-bg-secondary)',
                 fontSize: '14px',
-                lineHeight: '1.5'
+                lineHeight: '1.6',
+                borderRadius: '0 0 1rem 1rem'
               }}
             >
               {content}

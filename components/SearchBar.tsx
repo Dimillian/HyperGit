@@ -90,11 +90,39 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault()
-          setSelectedIndex(prev => prev > 0 ? prev - 1 : maxIndex)
+          setSelectedIndex(prev => {
+            const newIndex = prev > 0 ? prev - 1 : maxIndex
+            // Scroll to the selected item
+            setTimeout(() => {
+              const container = dropdownRef.current
+              if (container) {
+                const items = container.querySelectorAll('[data-dropdown-item]')
+                const selectedElement = items[newIndex] as HTMLElement
+                if (selectedElement) {
+                  selectedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                }
+              }
+            }, 0)
+            return newIndex
+          })
           break
         case 'ArrowDown':
           e.preventDefault()
-          setSelectedIndex(prev => prev < maxIndex ? prev + 1 : 0)
+          setSelectedIndex(prev => {
+            const newIndex = prev < maxIndex ? prev + 1 : 0
+            // Scroll to the selected item
+            setTimeout(() => {
+              const container = dropdownRef.current
+              if (container) {
+                const items = container.querySelectorAll('[data-dropdown-item]')
+                const selectedElement = items[newIndex] as HTMLElement
+                if (selectedElement) {
+                  selectedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                }
+              }
+            }, 0)
+            return newIndex
+          })
           break
         case 'Enter':
           e.preventDefault()
@@ -128,7 +156,7 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--neon-purple)] w-5 h-5" />
         <input
           ref={inputRef}
           type="text"
@@ -145,7 +173,7 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
           }}
           placeholder={isAuthenticated ? "Type @repo-name/file-path to search..." : "Please login with GitHub first"}
           disabled={!isAuthenticated}
-          className="w-full pl-12 pr-4 py-4 text-lg rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:ring-0 focus:outline-none bg-white shadow-sm transition-all duration-200"
+          className="w-full pl-12 pr-6 py-5 text-lg rounded-2xl glass-effect text-[var(--dark-text)] placeholder-[var(--dark-text-secondary)] focus:outline-none focus:border-[var(--neon-purple)] focus:neon-glow transition-all duration-300 shiny-surface"
         />
       </div>
 
@@ -153,31 +181,36 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
       {isDropdownOpen && isAuthenticated && (
         <div
           ref={dropdownRef}
-          className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-80 overflow-y-auto z-50"
+          className="absolute top-full mt-3 w-full glass-effect border border-[var(--neon-purple)]/30 rounded-2xl max-h-80 overflow-y-auto z-50 backdrop-blur-xl"
         >
           {mode === 'repos' ? (
             <>
-              <div className="p-3 border-b border-gray-100 text-sm font-medium text-gray-600">
+              <div className="p-4 border-b border-[var(--dark-border)] text-sm font-medium text-[var(--neon-purple)]">
                 {afterAt ? `Repositories matching "${afterAt}"` : 'Your Repositories'}
               </div>
               {filteredRepos.length === 0 ? (
-                <div className="p-4 text-gray-500 text-center">
+                <div className="p-4 text-[var(--dark-text-secondary)] text-center">
                   {afterAt ? `No repositories match "${afterAt}"` : 'No repositories found'}
                 </div>
               ) : (
                 filteredRepos.map((repo, index) => (
                   <div
                     key={repo.full_name}
-                    className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
-                      index === selectedIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'
+                    data-dropdown-item
+                    className={`flex items-start gap-3 p-4 cursor-pointer transition-all duration-200 ${
+                      index === selectedIndex ? 'bg-[var(--neon-purple)]/20 text-[var(--neon-purple-bright)] border-l-2 border-[var(--neon-purple)]' : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)]'
                     }`}
                     onClick={() => selectRepository(repo)}
                   >
-                    <GitBranch className="w-4 h-4 text-gray-400" />
-                    <div>
-                      <div className="font-medium">{repo.name}</div>
+                    <GitBranch className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                      index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
+                    }`} />
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="font-medium truncate text-left">{repo.name}</div>
                       {repo.description && (
-                        <div className="text-sm text-gray-500 truncate">{repo.description}</div>
+                        <div className={`text-sm truncate text-left ${
+                          index === selectedIndex ? 'text-[var(--neon-purple)]/70' : 'text-[var(--dark-text-secondary)]'
+                        }`}>{repo.description}</div>
                       )}
                     </div>
                   </div>
@@ -186,7 +219,7 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
             </>
           ) : (
             <>
-              <div className="p-3 border-b border-gray-100 text-sm font-medium text-gray-600 flex items-center justify-between">
+              <div className="p-4 border-b border-[var(--dark-border)] text-sm font-medium text-[var(--neon-purple)] flex items-center justify-between">
                 <span>{selectedRepo?.name} - {isSearching ? 'Searching...' : 'Files'}</span>
                 <button
                   onClick={() => {
@@ -194,33 +227,41 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
                     setSelectedRepo(null)
                     setQuery(beforeAt)
                   }}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
+                  className="text-[var(--neon-purple)] hover:text-[var(--neon-purple-bright)] text-sm transition-colors duration-200 px-2 py-1 rounded hover:bg-[var(--neon-purple)]/10"
                 >
                   ← Back
                 </button>
               </div>
               {isSearching ? (
-                <div className="p-4 text-gray-500 text-center">Searching repository...</div>
+                <div className="p-4 text-[var(--dark-text-secondary)] text-center flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[var(--neon-purple)]"></div>
+                  Searching repository...
+                </div>
               ) : searchResults.length === 0 ? (
-                <div className="p-4 text-gray-500 text-center">
+                <div className="p-4 text-[var(--dark-text-secondary)] text-center">
                   {afterAt.split('/').slice(1).join('/') ? 'No files found' : 'Start typing to search files'}
                 </div>
               ) : (
                 searchResults.map((file, index) => (
                   <div
                     key={file.path}
-                    className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
-                      index === selectedIndex ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'
+                    data-dropdown-item
+                    className={`flex items-start gap-3 p-4 cursor-pointer transition-all duration-200 ${
+                      index === selectedIndex ? 'bg-[var(--neon-purple)]/20 text-[var(--neon-purple-bright)] border-l-2 border-[var(--neon-purple)]' : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)]'
                     }`}
                     onClick={() => {
                       onFileSelect(selectedRepo!, file)
                       setIsDropdownOpen(false)
                     }}
                   >
-                    <File className="w-4 h-4 text-gray-400" />
-                    <div>
-                      <div className="font-medium">{file.name}</div>
-                      <div className="text-sm text-gray-500">{file.path}</div>
+                    <File className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                      index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
+                    }`} />
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="font-medium truncate text-left">{file.name}</div>
+                      <div className={`text-sm truncate text-left ${
+                        index === selectedIndex ? 'text-[var(--neon-purple)]/70' : 'text-[var(--dark-text-secondary)]'
+                      }`}>{file.path}</div>
                     </div>
                   </div>
                 ))

@@ -3,7 +3,64 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --neon-purple: #a855f7;
+    --neon-purple-bright: #c084fc;
+    --neon-purple-dark: #7c3aed;
+    --dark-bg: #000000;
+    --dark-bg-secondary: #0a0a0a;
+    --dark-bg-tertiary: #111111;
+    --dark-text: #e5e5e5;
+    --dark-text-secondary: #a3a3a3;
+    --dark-border: #1a1a1a;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-[var(--dark-bg)] text-[var(--dark-text)] min-h-screen;
+    background: radial-gradient(ellipse at top, #1a0d2e 0%, #0f051a 40%, var(--dark-bg) 70%);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon-purple) var(--dark-bg-secondary);
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--dark-bg-secondary);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--neon-purple);
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple-bright);
+  }
+}
+
+@layer components {
+  .neon-glow {
+    box-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-purple), 0 0 15px var(--neon-purple);
+  }
+
+  .neon-glow-hover:hover {
+    box-shadow: 0 0 5px var(--neon-purple-bright), 0 0 10px var(--neon-purple-bright), 0 0 20px var(--neon-purple-bright);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .shiny-surface {
+    background: linear-gradient(145deg, var(--dark-bg-secondary), var(--dark-bg-tertiary));
+    border: 1px solid var(--dark-border);
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(168, 85, 247, 0.2);
   }
 }

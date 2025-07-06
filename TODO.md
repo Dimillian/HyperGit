@@ -6,6 +6,7 @@
 - [x] GitHub Personal Access Token authentication
 - [x] Token storage in localStorage
 - [x] Token validation and error handling
+- [x] GitHub OAuth flow (alternative to personal tokens)
 - [ ] Add token expiration detection and refresh prompts
 - [ ] Add token scope validation (ensure 'repo' scope is present)
 - [ ] Add secure token storage options (consider encrypted storage)
@@ -93,7 +94,7 @@
 ## 🚀 Future Enhancements
 
 ### GitHub Integration
-- [ ] GitHub OAuth flow (alternative to personal tokens)
+- [x] GitHub OAuth flow (alternative to personal tokens)
 - [ ] GitHub Apps integration
 - [ ] Webhook support for real-time updates
 - [ ] GitHub Actions integration
