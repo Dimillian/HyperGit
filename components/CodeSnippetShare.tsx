@@ -32,14 +32,32 @@ export default function CodeSnippetShare({
 
     setIsGenerating(true)
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#0f0f0f',
+      // Use the wrapper element for cleaner capture
+      const element = cardRef.current
+      
+      // Force a reflow to ensure all content is rendered
+      element.style.display = 'block'
+      element.offsetHeight // Force reflow
+      
+      // Longer delay to ensure fonts and content are fully rendered
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // Get accurate dimensions including any overflow
+      const rect = element.getBoundingClientRect()
+      const computedHeight = Math.max(element.offsetHeight, element.scrollHeight, rect.height)
+      
+      const canvas = await html2canvas(element, {
+        backgroundColor: 'transparent',
         scale: 2, // High DPI for better quality
         useCORS: true,
         allowTaint: true,
         logging: false,
-        width: 800,
-        // Let height be determined by content
+        width: element.offsetWidth,
+        height: computedHeight + 30, // Add extra 30px for text descenders
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0
       } as any)
 
       // Convert to blob and download
@@ -101,16 +119,22 @@ export default function CodeSnippetShare({
           <div className="mb-6">
             <h3 className="text-lg font-medium text-[var(--dark-text)] mb-4">Preview</h3>
             
-            {/* The card that will be screenshotted */}
+            {/* Wrapper for screenshot */}
             <div 
               ref={cardRef}
-              className="bg-[#0f0f0f] rounded-xl border border-[var(--neon-purple)]/30 overflow-hidden inline-block"
-              style={{ width: '800px' }}
+              className="bg-transparent"
+              style={{ 
+                width: '832px', // 800px + 32px padding
+                padding: '16px',
+                margin: '20px 0' // Margin to prevent boundary issues
+              }}
             >
-              {/* Card Header - Fixed Height */}
-              <div className="bg-gradient-to-r from-[var(--neon-purple)]/15 to-[var(--neon-purple-bright)]/15 p-4 border-b border-[var(--neon-purple)]/20 flex-shrink-0">
-                <div className="text-lg font-semibold text-[var(--dark-text)] truncate">{repo.full_name}</div>
-                <div className="text-sm text-[var(--dark-text-secondary)] truncate">
+              {/* The actual card */}
+              <div className="screenshot-card bg-[#0f0f0f] rounded-xl border border-[var(--neon-purple)]/30 overflow-hidden" style={{ paddingBottom: '8px' }}>
+              {/* Card Header */}
+              <div className="bg-gradient-to-r from-[var(--neon-purple)]/15 to-[var(--neon-purple-bright)]/15 px-4 py-4 border-b border-[var(--neon-purple)]/20 flex-shrink-0 flex flex-col justify-center">
+                <div className="text-lg font-semibold text-[var(--dark-text)] truncate leading-relaxed mb-1">{repo.full_name}</div>
+                <div className="text-sm text-[var(--dark-text-secondary)] truncate leading-relaxed" style={{ paddingBottom: '4px' }}>
                   {file.path} • Lines {selectedLines.start}-{selectedLines.end}
                 </div>
               </div>
@@ -127,12 +151,13 @@ export default function CodeSnippetShare({
                 </SyntaxHighlighter>
               </div>
 
-              {/* Card Footer - Compact */}
-              <div className="border-t border-[var(--neon-purple)]/20 px-4 py-2 flex-shrink-0">
-                <div className="flex justify-between items-center text-xs text-[var(--dark-text-secondary)]">
-                  <span>github.com/{repo.full_name}</span>
-                  <span>Generated with HyperGit.app</span>
+              {/* Card Footer */}
+              <div className="border-t border-[var(--neon-purple)]/20 px-4 py-4 flex-shrink-0 flex items-center">
+                <div className="flex justify-between items-center text-xs text-[var(--dark-text-secondary)] leading-loose w-full" style={{ paddingBottom: '4px' }}>
+                  <span className="truncate mr-4">github.com/{repo.full_name}</span>
+                  <span className="whitespace-nowrap">Generated with HyperGit.app</span>
                 </div>
+              </div>
               </div>
             </div>
           </div>
