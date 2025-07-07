@@ -13,17 +13,15 @@ import * as SimpleIcons from 'simple-icons'
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile } | null>(null)
+  const [recentFilesKey, setRecentFilesKey] = useState(0)
   const { isAuthenticated, repositories, clearToken, loading } = useGitHub()
-  const recentFilesRef = useRef<{ refreshRecentFiles: () => void } | null>(null)
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile) => {
     // Track the file visit
     RecentFilesManager.addRecentFile(repo, file)
     
-    // Refresh recent files list if component is mounted
-    if (recentFilesRef.current) {
-      recentFilesRef.current.refreshRecentFiles()
-    }
+    // Force re-render of recent files component
+    setRecentFilesKey(prev => prev + 1)
     
     setSelectedFile({ repo, file })
   }
@@ -241,7 +239,7 @@ export default function Home() {
               {/* Recent Files Section */}
               {isAuthenticated && (
                 <div className="max-w-4xl mx-auto">
-                  <RecentFiles onFileSelect={handleFileSelect} />
+                  <RecentFiles key={recentFilesKey} onFileSelect={handleFileSelect} />
                 </div>
               )}
             </div>
