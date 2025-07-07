@@ -14,7 +14,7 @@ import * as SimpleIcons from 'simple-icons'
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile } | null>(null)
   const { isAuthenticated, repositories, clearToken, loading } = useGitHub()
-  const recentFilesRef = useRef<{ refreshRecentFiles: () => void }>()
+  const recentFilesRef = useRef<{ refreshRecentFiles: () => void } | null>(null)
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile) => {
     // Track the file visit
