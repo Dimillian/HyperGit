@@ -219,6 +219,16 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     setSelectedIndex(0)
   }, [mode, afterAt])
 
+  // Reset state when search bar is emptied
+  useEffect(() => {
+    if (query.trim() === '') {
+      setMode('repos')
+      setSelectedRepo(null)
+      setSearchResults([])
+      setSelectedIndex(0)
+    }
+  }, [query])
+
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <div className="relative">
