@@ -1,18 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useGitHub } from '@/hooks/useGitHub'
 import { GitHubRepo, GitHubFile } from '@/lib/github/api'
+import { RecentFilesManager } from '@/lib/recentFiles'
 import SearchBar from '@/components/SearchBar'
 import FileViewer from '@/components/FileViewer'
 import AuthPrompt from '@/components/AuthPrompt'
-import { LogOut } from 'lucide-react'
+import RecentFiles from '@/components/RecentFiles'
+import { LogOut, GitBranch, Clock } from 'lucide-react'
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile } | null>(null)
   const { isAuthenticated, repositories, clearToken, loading } = useGitHub()
+  const recentFilesRef = useRef<{ refreshRecentFiles: () => void }>()
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile) => {
+    // Track the file visit
+    RecentFilesManager.addRecentFile(repo, file)
+    
+    // Refresh recent files list if component is mounted
+    if (recentFilesRef.current) {
+      recentFilesRef.current.refreshRecentFiles()
+    }
+    
     setSelectedFile({ repo, file })
   }
 
@@ -100,12 +111,19 @@ export default function Home() {
               ref={(ref) => { if (ref) window.searchBarRef = ref }}
             />
 
-            <div className="mt-12">
-              <p className="text-[var(--dark-text-secondary)] mb-4">
+            <div className="mt-12 space-y-12">
+              <p className="text-[var(--dark-text-secondary)] mb-8">
                 Quick tip: Type <code className="bg-[var(--dark-bg-tertiary)] text-[var(--neon-purple)] px-2 py-1 rounded text-sm border border-[var(--neon-purple)]/30">@repo-name/filename</code> to search
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+              {/* Recent Repositories Section */}
+              <div className="max-w-4xl mx-auto space-y-4">
+                <div className="flex items-center gap-2">
+                  <GitBranch className="w-5 h-5 text-[var(--neon-purple)]" />
+                  <h3 className="text-lg font-semibold text-[var(--dark-text)]">Recent Repositories</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
                   // Shimmer loading cards
                   Array.from({ length: 6 }).map((_, index) => (
@@ -147,7 +165,15 @@ export default function Home() {
                     </div>
                   ))
                 ) : null}
+                </div>
               </div>
+
+              {/* Recent Files Section */}
+              {isAuthenticated && (
+                <div className="max-w-4xl mx-auto">
+                  <RecentFiles onFileSelect={handleFileSelect} />
+                </div>
+              )}
             </div>
           </div>
         </div>
