@@ -232,7 +232,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--neon-purple)] w-5 h-5" />
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--neon-purple)] w-5 h-5 z-10 drop-shadow-lg" />
         <input
           ref={inputRef}
           type="text"
