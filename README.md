@@ -7,12 +7,16 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 ## ✨ Features
 
 - **@-mention search**: Type `@repo-name/filename` to instantly find files
-- **Two-stage navigation**: Browse repositories → search files within
+- **Folder browsing**: Navigate repository structure manually with breadcrumb navigation
+- **Two-stage navigation**: Browse repositories → explore folders → search files
 - **GitHub OAuth**: One-click authentication with GitHub (or use Personal Access Tokens)
 - **Dark theme**: Sleek black interface with neon purple accents
 - **Syntax highlighting**: Beautiful code display with dark theme syntax highlighting
-- **Keyboard navigation**: Full keyboard support with auto-scrolling
+- **Keyboard navigation**: Full keyboard support with auto-scrolling and folder navigation
 - **Glass effects**: Shiny, reactive UI with backdrop blur and neon glows
+- **Smart caching**: Lightning-fast search with intelligent file tree caching
+- **Language icons**: Professional programming language icons from Simple Icons
+- **Recent files**: Track and quickly access recently viewed files
 - **Responsive design**: Works perfectly on desktop and mobile
 - **Private repos**: Access your private repositories securely
 
@@ -67,10 +71,17 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 3. Type `/` followed by filename to search within the repo
 4. Click any file to view with syntax highlighting
 
+### Folder Browsing
+1. Select a repository to enter folder browsing mode
+2. Click folder icons to navigate into directories
+3. Use breadcrumb navigation to go back to parent folders
+4. Press `Escape` to go back one folder level
+5. Switch between browsing and searching seamlessly
+
 ### Keyboard Shortcuts
 - `↑/↓` - Navigate search results (auto-scrolls)
-- `Enter` - Select repository or file
-- `Escape` - Go back or close
+- `Enter` - Select repository, folder, or file
+- `Escape` - Go back one folder level, close file viewer, or reset search
 - Copy button in file viewer - Copy file content
 
 ### Example Searches
@@ -78,13 +89,20 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 - `@my-app/component` - Search for files containing "component"
 - `@my-app/src/utils.ts` - Find specific file path
 
+### Smart Features
+- **Recent Files**: Automatically tracks your recently viewed files
+- **File Tree Caching**: Repository structure is cached for instant browsing
+- **Search Reset**: File viewer automatically resets search bar when closed
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 15 with TypeScript
 - **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Syntax Highlighting**: React Syntax Highlighter
-- **API**: GitHub REST API v3
+- **Icons**: Lucide React + Simple Icons for programming languages
+- **Syntax Highlighting**: React Syntax Highlighter with dark theme
+- **API**: GitHub REST API v3 with GitHub Trees API for efficient file loading
+- **Caching**: LRU cache with localStorage persistence
+- **Analytics**: Vercel Analytics
 
 ## 📁 Project Structure
 
@@ -95,18 +113,32 @@ HyperGit/
 │   │   ├── github/          # GitHub OAuth initiation
 │   │   └── callback/        # OAuth callback handler
 │   ├── globals.css          # Global styles with dark theme
-│   ├── layout.tsx           # Root layout
-│   └── page.tsx             # Main page
+│   ├── layout.tsx           # Root layout with analytics
+│   └── page.tsx             # Main page with language icons
 ├── components/              # React components
 │   ├── AuthPrompt.tsx       # GitHub OAuth + token auth
-│   ├── FileViewer.tsx       # File display modal with dark theme
-│   └── SearchBar.tsx        # Main search interface with glass effects
+│   ├── FileViewer.tsx       # File display modal with escape key support
+│   ├── RecentFiles.tsx      # Recent files tracking with language icons
+│   ├── SearchBar.tsx        # Main search interface (refactored)
+│   └── SearchBar/           # Modular SearchBar components
+│       ├── components/      # UI components
+│       │   ├── RepositoryDropdown.tsx
+│       │   └── FileDropdown.tsx
+│       ├── hooks/           # Custom hooks
+│       │   ├── useDropdownVisibility.ts
+│       │   └── useKeyboardNavigation.ts
+│       └── utils/           # Utility functions
+│           └── folderUtils.ts
 ├── hooks/                   # Custom React hooks
 │   └── useGitHub.ts         # GitHub API state management
 ├── lib/                     # Utilities
-│   └── github/
-│       └── api.ts           # GitHub API client
+│   ├── github/
+│   │   ├── api.ts           # GitHub API client
+│   │   └── cache.ts         # File tree caching system
+│   └── recentFiles.ts       # Recent files management
+├── global.d.ts              # TypeScript global definitions
 ├── .env.example             # Environment variables template
+├── TODO.md                  # Development roadmap
 └── README.md
 ```
 
