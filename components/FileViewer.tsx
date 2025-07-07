@@ -45,6 +45,10 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
+        // Reset search bar when closing via escape
+        if (window.searchBarRef?.resetSearchBar) {
+          window.searchBarRef.resetSearchBar()
+        }
       }
     }
 
@@ -65,7 +69,18 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
   const language = getFileLanguage(file.name)
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+          // Reset search bar when closing via backdrop click
+          if (window.searchBarRef?.resetSearchBar) {
+            window.searchBarRef.resetSearchBar()
+          }
+        }
+      }}
+    >
       <div className="glass-effect rounded-2xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-[var(--neon-purple)]/30 neon-glow">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--dark-border)]">
@@ -106,7 +121,13 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
             </a>
             
             <button
-              onClick={onClose}
+              onClick={() => {
+                onClose()
+                // Reset search bar when closing via close button
+                if (window.searchBarRef?.resetSearchBar) {
+                  window.searchBarRef.resetSearchBar()
+                }
+              }}
               className="ml-2 px-3 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
             >
               ×

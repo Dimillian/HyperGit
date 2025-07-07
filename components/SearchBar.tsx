@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { GitHubRepo, GitHubFile } from '@/lib/github/api'
 import { fileTreeCache } from '@/lib/github/cache'
-import { Search, GitBranch, File, Folder } from 'lucide-react'
+import { Search, GitBranch, File, Folder, ChevronRight } from 'lucide-react'
 import { useGitHub } from '@/hooks/useGitHub'
 
 interface SearchBarProps {
@@ -18,6 +18,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
   const [mode, setMode] = useState<'repos' | 'files'>('repos')
   const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(null)
   const [searchResults, setSearchResults] = useState<GitHubFile[]>([])
+  const [currentPath, setCurrentPath] = useState<string>('') // Track current folder path
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isSearching, setIsSearching] = useState(false)
   const [isCacheBuilding, setIsCacheBuilding] = useState(false)
@@ -38,7 +39,64 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
   }
 
   const { beforeAt, afterAt } = parseQuery(query)
-  const isInMention = query.includes('@')
+  
+  // Helper function to get files and folders for a specific path
+  const getItemsForPath = (allFiles: GitHubFile[], path: string): GitHubFile[] => {
+    const folders = new Set<string>()
+    const items: GitHubFile[] = []
+    
+    allFiles.forEach(file => {
+      // Skip if not in current path
+      if (path && !file.path.startsWith(path + '/')) return
+      if (!path && file.path.includes('/') && !file.path.startsWith('/')) {
+        // Root level - check for folders
+        const firstSlash = file.path.indexOf('/')
+        if (firstSlash > 0) {
+          const folderName = file.path.substring(0, firstSlash)
+          if (!folders.has(folderName)) {
+            folders.add(folderName)
+            items.push({
+              name: folderName,
+              path: folderName,
+              type: 'dir' as const,
+              sha: '',
+              size: 0
+            })
+          }
+        }
+      } else {
+        // Deeper level
+        const relativePath = path ? file.path.substring(path.length + 1) : file.path
+        const firstSlash = relativePath.indexOf('/')
+        
+        if (firstSlash === -1) {
+          // It's a file in current directory
+          items.push(file)
+        } else if (firstSlash > 0) {
+          // It's a folder
+          const folderName = relativePath.substring(0, firstSlash)
+          const fullFolderPath = path ? `${path}/${folderName}` : folderName
+          if (!folders.has(fullFolderPath)) {
+            folders.add(fullFolderPath)
+            items.push({
+              name: folderName,
+              path: fullFolderPath,
+              type: 'dir' as const,
+              sha: '',
+              size: 0
+            })
+          }
+        }
+      }
+    })
+    
+    // Sort folders first, then files
+    return items.sort((a, b) => {
+      if (a.type === 'dir' && b.type === 'file') return -1
+      if (a.type === 'file' && b.type === 'dir') return 1
+      return a.name.localeCompare(b.name)
+    })
+  }
 
   // Filter repositories based on query
   const filteredRepos = repositories.filter(repo => 
@@ -51,6 +109,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     setMode('files')
     setQuery(beforeAt + '@' + repo.name + '/')
     setSelectedIndex(0)
+    setCurrentPath('') // Reset to root when selecting a repo
     
     try {
       // Check cache first
@@ -75,9 +134,9 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
         }
       }
       
-      // Show root files only
-      const rootFiles = files.filter(file => !file.path.includes('/'))
-      setSearchResults(rootFiles)
+      // Show root files and folders
+      const rootItems = getItemsForPath(files, '')
+      setSearchResults(rootItems)
     } catch (error) {
       console.error('Failed to load repository tree:', error)
       setIsCacheBuilding(false)
@@ -106,9 +165,34 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     selectRepository(repo, true)
   }
 
+  // Public method to reset search bar
+  const resetSearchBar = () => {
+    setQuery('')
+    setMode('repos')
+    setSelectedRepo(null)
+    setSearchResults([])
+    setSelectedIndex(0)
+    setCurrentPath('')
+    setIsDropdownOpen(false)
+  }
+
+  // Handle folder navigation
+  const navigateToFolder = (folderPath: string) => {
+    setCurrentPath(folderPath)
+    setSelectedIndex(0)
+    
+    // Update search results to show contents of the folder
+    const cachedFiles = fileTreeCache.get(selectedRepo!.full_name)
+    if (cachedFiles) {
+      const folderItems = getItemsForPath(cachedFiles, folderPath)
+      setSearchResults(folderItems)
+    }
+  }
+  
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
-    selectRepositoryFromCard
+    selectRepositoryFromCard,
+    resetSearchBar
   }))
 
   // Handle file search when in file mode
@@ -135,16 +219,16 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
 
         return () => clearTimeout(searchTimeout)
       } else {
-        // Show root files when no search query
+        // Show items for current path when no search query
         const cachedFiles = fileTreeCache.get(selectedRepo.full_name)
         if (cachedFiles) {
-          const rootFiles = cachedFiles.filter(file => !file.path.includes('/'))
-          setSearchResults(rootFiles)
+          const pathItems = getItemsForPath(cachedFiles, currentPath)
+          setSearchResults(pathItems)
         }
         setIsSearching(false)
       }
     }
-  }, [afterAt, mode, selectedRepo])
+  }, [afterAt, mode, selectedRepo, currentPath])
 
   // Keyboard navigation
   useEffect(() => {
@@ -195,16 +279,28 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
           if (mode === 'repos' && filteredRepos[selectedIndex]) {
             selectRepository(filteredRepos[selectedIndex])
           } else if (mode === 'files' && searchResults[selectedIndex]) {
-            onFileSelect(selectedRepo!, searchResults[selectedIndex])
-            setIsDropdownOpen(false)
+            const selectedItem = searchResults[selectedIndex]
+            if (selectedItem.type === 'dir') {
+              navigateToFolder(selectedItem.path)
+            } else {
+              onFileSelect(selectedRepo!, selectedItem)
+              setIsDropdownOpen(false)
+            }
           }
           break
         case 'Escape':
-          setIsDropdownOpen(false)
-          if (mode === 'files') {
-            setMode('repos')
-            setSelectedRepo(null)
-            setQuery(beforeAt)
+          if (mode === 'files' && currentPath) {
+            // Go back one folder level
+            const lastSlash = currentPath.lastIndexOf('/')
+            setCurrentPath(lastSlash > 0 ? currentPath.substring(0, lastSlash) : '')
+          } else {
+            setIsDropdownOpen(false)
+            if (mode === 'files') {
+              setMode('repos')
+              setSelectedRepo(null)
+              setQuery(beforeAt)
+              setCurrentPath('')
+            }
           }
           break
       }
@@ -226,6 +322,8 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
       setSelectedRepo(null)
       setSearchResults([])
       setSelectedIndex(0)
+      setCurrentPath('')
+      setIsDropdownOpen(false)
     }
   }, [query])
 
@@ -238,8 +336,20 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => isAuthenticated && setIsDropdownOpen(true)}
-          onBlur={(e) => {
+          onFocus={() => {
+            if (isAuthenticated) {
+              setIsDropdownOpen(true)
+              // If we're in file mode but have no search results, show the folder contents
+              if (mode === 'files' && selectedRepo && searchResults.length === 0) {
+                const cachedFiles = fileTreeCache.get(selectedRepo.full_name)
+                if (cachedFiles) {
+                  const pathItems = getItemsForPath(cachedFiles, currentPath)
+                  setSearchResults(pathItems)
+                }
+              }
+            }
+          }}
+          onBlur={() => {
             // Delay to allow clicking dropdown items
             setTimeout(() => {
               if (!dropdownRef.current?.contains(document.activeElement)) {
@@ -295,18 +405,45 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
             </>
           ) : (
             <>
-              <div className="p-4 border-b border-[var(--dark-border)] text-sm font-medium text-[var(--neon-purple)] flex items-center justify-between">
-                <span>{selectedRepo?.name} - {isCacheBuilding ? 'Loading files...' : isSearching ? 'Searching...' : 'Files'}</span>
-                <button
-                  onClick={() => {
-                    setMode('repos')
-                    setSelectedRepo(null)
-                    setQuery(beforeAt)
-                  }}
-                  className="text-[var(--neon-purple)] hover:text-[var(--neon-purple-bright)] text-sm transition-colors duration-200 px-2 py-1 rounded hover:bg-[var(--neon-purple)]/10"
-                >
-                  ← Back
-                </button>
+              <div className="p-4 border-b border-[var(--dark-border)] text-sm font-medium text-[var(--neon-purple)]">
+                <div className="flex items-center justify-between mb-2">
+                  <span>{selectedRepo?.name} - {isCacheBuilding ? 'Loading files...' : isSearching ? 'Searching...' : 'Files'}</span>
+                  <button
+                    onClick={() => {
+                      setMode('repos')
+                      setSelectedRepo(null)
+                      setQuery(beforeAt)
+                      setCurrentPath('')
+                    }}
+                    className="text-[var(--neon-purple)] hover:text-[var(--neon-purple-bright)] text-sm transition-colors duration-200 px-2 py-1 rounded hover:bg-[var(--neon-purple)]/10"
+                  >
+                    ← Back
+                  </button>
+                </div>
+                {currentPath && (
+                  <div className="flex items-center gap-1 text-xs text-[var(--dark-text-secondary)]">
+                    <button
+                      onClick={() => setCurrentPath('')}
+                      className="hover:text-[var(--neon-purple)] transition-colors"
+                    >
+                      root
+                    </button>
+                    {currentPath.split('/').map((segment, index, arr) => {
+                      const path = arr.slice(0, index + 1).join('/')
+                      return (
+                        <span key={path} className="flex items-center">
+                          <ChevronRight className="w-3 h-3 mx-1" />
+                          <button
+                            onClick={() => setCurrentPath(path)}
+                            className="hover:text-[var(--neon-purple)] transition-colors"
+                          >
+                            {segment}
+                          </button>
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
               {isCacheBuilding ? (
                 <div className="p-4 text-[var(--dark-text-secondary)] text-center">
@@ -338,15 +475,28 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
                         index === selectedIndex ? 'bg-[var(--neon-purple)]/20 text-[var(--neon-purple-bright)] border-l-2 border-[var(--neon-purple)]' : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)]'
                       }`}
                       onClick={() => {
-                        onFileSelect(selectedRepo!, file)
-                        setIsDropdownOpen(false)
+                        if (file.type === 'dir') {
+                          navigateToFolder(file.path)
+                        } else {
+                          onFileSelect(selectedRepo!, file)
+                          setIsDropdownOpen(false)
+                        }
                       }}
                     >
-                      <File className={`w-4 h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
-                        index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
-                      }`} />
+                      {file.type === 'dir' ? (
+                        <Folder className={`w-4 h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
+                          index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
+                        }`} />
+                      ) : (
+                        <File className={`w-4 h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
+                          index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
+                        }`} />
+                      )}
                       <div className="flex-1 min-w-0 text-left">
-                        <div className="font-medium truncate text-left">{file.name}</div>
+                        <div className="font-medium truncate text-left flex items-center gap-1">
+                          {file.name}
+                          {file.type === 'dir' && <ChevronRight className="w-3 h-3 opacity-50" />}
+                        </div>
                         {!isRootFileView && (
                           <div className={`text-sm truncate text-left ${
                             index === selectedIndex ? 'text-[var(--neon-purple)]/70' : 'text-[var(--dark-text-secondary)]'

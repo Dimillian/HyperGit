@@ -16,15 +16,18 @@
 - [x] Repository filtering and selection
 - [x] File search within repositories
 - [x] Keyboard navigation (arrow keys, enter, escape)
+- [x] Auto-populate search bar when clicking repository cards
+- [x] Search history and recent files (Recently Browsed Files section)
+- [x] Fuzzy search improvements (integrated Fuse.js)
+- [x] Auto-scroll on keyboard navigation
 - [ ] Advanced search filters (file type, date modified, size)
-- [ ] Search history and recent files
-- [ ] Fuzzy search improvements
 - [ ] Search across multiple repositories simultaneously
 
 ### File Viewing
 - [x] Syntax-highlighted file display
 - [x] Copy to clipboard functionality
 - [x] Direct GitHub link
+- [x] Escape key support to close file viewer
 - [ ] Line number jumping (URL fragments like #L123)
 - [ ] File download capability
 - [ ] Print-friendly view
@@ -37,7 +40,11 @@
 - [x] Beautiful, minimal design
 - [x] Responsive layout
 - [x] Loading states
-- [ ] Dark mode support
+- [x] Dark mode support (dark theme with neon purple accents)
+- [x] Custom branding (HyperGit logo with GitHub + lightning bolt)
+- [x] Professional language icons (using Simple Icons)
+- [x] Section headers for Recent Repositories and Recent Files
+- [x] Footer with credits and links
 - [ ] Keyboard shortcuts help modal
 - [ ] Better empty states and onboarding
 - [ ] Accessibility improvements (ARIA labels, focus management)
@@ -49,6 +56,8 @@
 - [x] Fast local search with Fuse.js fuzzy matching
 - [x] GitHub Trees API for efficient file tree loading
 - [x] Debounced search optimization (reduced to 100ms)
+- [x] Recently browsed files cache (localStorage with timestamps)
+- [x] Pagination for repository listing (fetches all pages)
 - [ ] Lazy loading for large file lists
 - [ ] Virtual scrolling for long search results
 - [ ] Background repository syncing
@@ -71,6 +80,7 @@
 - [ ] File comparison tool
 
 ### Analytics & Insights
+- [x] Vercel Analytics integration
 - [ ] Most accessed files tracking
 - [ ] Repository usage analytics
 - [ ] Search pattern insights
@@ -79,6 +89,10 @@
 ## 🐛 Bug Fixes & Polish
 
 ### Known Issues
+- [x] Fixed hydration errors with browser extensions (suppressHydrationWarning)
+- [x] Fixed syntax highlighter line outline issues
+- [x] Fixed search dropdown content alignment
+- [x] Fixed shimmer placeholder colors for dark theme
 - [ ] Handle rate limiting gracefully
 - [ ] Improve error messages for network failures
 - [ ] Handle very large files (>1MB)
@@ -107,15 +121,3 @@
 - [ ] Self-hosted Git repository support
 - [ ] Local repository browsing
 
----
-
-## Update Guidelines
-
-**IMPORTANT**: This TODO list should be updated whenever:
-1. Starting work on a new feature (move to "In Progress")
-2. Completing a feature (mark as done with ✅)
-3. Discovering new requirements (add to appropriate section)
-4. Changing priorities (move between sections)
-5. Finding bugs (add to Bug Fixes section)
-
-Last Updated: January 2025
