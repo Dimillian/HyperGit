@@ -155,7 +155,28 @@ export class GitHubAPI {
 
   // Get user's repositories
   async getUserRepositories(): Promise<GitHubRepo[]> {
-    return this.request<GitHubRepo[]>('/user/repos?sort=updated&per_page=100')
+    const allRepos: GitHubRepo[] = []
+    let page = 1
+    const perPage = 100
+    
+    while (true) {
+      const repos = await this.request<GitHubRepo[]>(`/user/repos?sort=updated&per_page=${perPage}&page=${page}`)
+      
+      if (repos.length === 0) {
+        break
+      }
+      
+      allRepos.push(...repos)
+      
+      // If we got less than perPage, we've reached the end
+      if (repos.length < perPage) {
+        break
+      }
+      
+      page++
+    }
+    
+    return allRepos
   }
 
   // Search repository files using GitHub's search API
