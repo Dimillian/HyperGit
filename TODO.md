@@ -6,13 +6,15 @@
 - ✅ **Folder Browsing**: Complete repository folder navigation with breadcrumb support
 - ✅ **Component Refactoring**: Reduced SearchBar complexity from 538 to 307 lines (~43% reduction)
 - ✅ **Modular Architecture**: Extracted hooks, components, and utilities for better maintainability
+- ✅ **Code Snippet Sharing**: Line selection + beautiful screenshot generation for social media
 - ✅ **Bug Fixes**: Fixed dropdown visibility, search bar reset, and component complexity issues
 - ✅ **Enhanced UX**: Improved keyboard navigation with folder support and escape key handling
 
 ### Code Quality Improvements
 - ✅ Created reusable hooks: `useDropdownVisibility`, `useKeyboardNavigation`
-- ✅ Extracted UI components: `RepositoryDropdown`, `FileDropdown`
+- ✅ Extracted UI components: `RepositoryDropdown`, `FileDropdown`, `CodeSnippetShare`
 - ✅ Added utility functions: `folderUtils.ts` with parsing and navigation helpers
+- ✅ Enhanced FileViewer with line selection and sharing capabilities
 - ✅ Improved TypeScript types and interfaces
 - ✅ Better separation of concerns and maintainability
 
@@ -93,7 +95,8 @@
 - [ ] Integration with VS Code (open file in editor)
 
 ### Collaboration
-- [ ] Share file links with line highlighting
+- [x] Share file links with line highlighting (via code snippet sharing)
+- [x] Social media sharing with beautiful screenshots
 - [ ] Create GitHub gists from file selections
 - [ ] Comment on files (via GitHub API)
 - [ ] File comparison tool

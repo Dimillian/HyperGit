@@ -8,6 +8,7 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 
 - **@-mention search**: Type `@repo-name/filename` to instantly find files
 - **Folder browsing**: Navigate repository structure manually with breadcrumb navigation
+- **Code snippet sharing**: Select lines of code and generate beautiful screenshots for social media
 - **Two-stage navigation**: Browse repositories → explore folders → search files
 - **GitHub OAuth**: One-click authentication with GitHub (or use Personal Access Tokens)
 - **Dark theme**: Sleek black interface with neon purple accents
@@ -94,12 +95,21 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 - **File Tree Caching**: Repository structure is cached for instant browsing
 - **Search Reset**: File viewer automatically resets search bar when closed
 
+### Code Snippet Sharing
+1. Open any file in the file viewer
+2. Select lines of code by clicking and dragging
+3. Click the "Share Snippet" button that appears
+4. Generate a beautiful screenshot for social media
+5. Download the image or share directly to Twitter/LinkedIn
+6. Copy GitHub links with line highlighting
+
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 15 with TypeScript
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React + Simple Icons for programming languages
 - **Syntax Highlighting**: React Syntax Highlighter with dark theme
+- **Screenshot Generation**: html2canvas for social media sharing
 - **API**: GitHub REST API v3 with GitHub Trees API for efficient file loading
 - **Caching**: LRU cache with localStorage persistence
 - **Analytics**: Vercel Analytics
@@ -117,7 +127,8 @@ HyperGit/
 │   └── page.tsx             # Main page with language icons
 ├── components/              # React components
 │   ├── AuthPrompt.tsx       # GitHub OAuth + token auth
-│   ├── FileViewer.tsx       # File display modal with escape key support
+│   ├── FileViewer.tsx       # File display modal with line selection and sharing
+│   ├── CodeSnippetShare.tsx # Screenshot generation for social media sharing
 │   ├── RecentFiles.tsx      # Recent files tracking with language icons
 │   ├── SearchBar.tsx        # Main search interface (refactored)
 │   └── SearchBar/           # Modular SearchBar components

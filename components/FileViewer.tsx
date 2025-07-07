@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
 import { useGitHub } from '@/hooks/useGitHub'
-import { File, ExternalLink, Copy, CheckCircle } from 'lucide-react'
+import { File, ExternalLink, Copy, CheckCircle, Camera } from 'lucide-react'
+import CodeSnippetShare from './CodeSnippetShare'
 
 interface FileViewerProps {
   repo: GitHubRepo
@@ -18,6 +19,10 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [selectedLines, setSelectedLines] = useState<{ start: number; end: number } | null>(null)
+  const [isSelecting, setIsSelecting] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const codeRef = useRef<HTMLDivElement>(null)
   const { github } = useGitHub()
 
   useEffect(() => {
@@ -58,11 +63,79 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(content)
+      const textToCopy = selectedLines ? getSelectedCode() : content
+      await navigator.clipboard.writeText(textToCopy)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy:', err)
+    }
+  }
+
+  const getSelectedCode = () => {
+    if (!selectedLines || !content) return ''
+    const lines = content.split('\n')
+    return lines.slice(selectedLines.start - 1, selectedLines.end).join('\n')
+  }
+
+  const handleLineSelection = () => {
+    if (!codeRef.current) return
+
+    const selection = window.getSelection()
+    if (!selection || selection.isCollapsed) {
+      setSelectedLines(null)
+      return
+    }
+
+    // Find the start and end line numbers
+    const range = selection.getRangeAt(0)
+    const codeElement = codeRef.current.querySelector('code')
+    
+    if (!codeElement) return
+
+    // Get all line elements
+    const lineElements = codeElement.querySelectorAll('.linenumber')
+    if (lineElements.length === 0) return
+
+    // Find which lines are selected
+    let startLine = 1
+    let endLine = 1
+
+    try {
+      // Get the text content and find line positions
+      const fullText = codeElement.textContent || ''
+      const selectedText = selection.toString()
+      
+      if (!selectedText.trim()) {
+        setSelectedLines(null)
+        return
+      }
+
+      const beforeSelection = fullText.substring(0, fullText.indexOf(selectedText))
+      const linesBeforeSelection = beforeSelection.split('\n').length
+      const selectedTextLines = selectedText.split('\n').length
+
+      startLine = linesBeforeSelection
+      endLine = linesBeforeSelection + selectedTextLines - 1
+
+      // Ensure we have valid line numbers
+      if (startLine > 0 && endLine > 0 && endLine >= startLine) {
+        setSelectedLines({ start: startLine, end: endLine })
+      }
+    } catch (error) {
+      console.error('Error calculating line selection:', error)
+      setSelectedLines(null)
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedLines(null)
+    window.getSelection()?.removeAllRanges()
+  }
+
+  const handleShareClick = () => {
+    if (selectedLines) {
+      setShowShareModal(true)
     }
   }
 
@@ -93,6 +166,18 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
           </div>
           
           <div className="flex items-center gap-2">
+            {selectedLines && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-purple)]/20 text-[var(--neon-purple)] text-sm rounded-lg border border-[var(--neon-purple)]/30">
+                Lines {selectedLines.start}-{selectedLines.end} selected
+                <button
+                  onClick={clearSelection}
+                  className="text-xs hover:text-[var(--neon-purple-bright)] ml-1"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
             <button
               onClick={copyToClipboard}
               className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
@@ -100,15 +185,25 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
               {copied ? (
                 <>
                   <CheckCircle className="w-4 h-4 text-green-400" />
-                  Copied!
+                  {selectedLines ? 'Selection Copied!' : 'Copied!'}
                 </>
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  Copy
+                  {selectedLines ? 'Copy Selection' : 'Copy'}
                 </>
               )}
             </button>
+
+            {selectedLines && (
+              <button
+                onClick={handleShareClick}
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] text-white hover:from-[var(--neon-purple-bright)] hover:to-[var(--neon-purple)] rounded-lg transition-all duration-200 neon-glow-hover"
+              >
+                <Camera className="w-4 h-4" />
+                Share Snippet
+              </button>
+            )}
             
             <a
               href={`https://github.com/${repo.full_name}/blob/${repo.default_branch}/${file.path}`}
@@ -149,17 +244,44 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
               <div className="text-red-400">Error: {error}</div>
             </div>
           ) : (
-            <SyntaxHighlighter
-              language={language}
-              style={oneDark}
-              showLineNumbers
-              wrapLines
-            >
-              {content}
-            </SyntaxHighlighter>
+            <>
+              {!selectedLines && (
+                <div className="px-6 py-3 bg-[var(--neon-purple)]/10 border-b border-[var(--neon-purple)]/20">
+                  <p className="text-sm text-[var(--neon-purple)]">
+                    💡 Tip: Select lines of code to share as a beautiful screenshot!
+                  </p>
+                </div>
+              )}
+              <div 
+                ref={codeRef}
+                onMouseUp={handleLineSelection}
+                className="select-text"
+              >
+                <SyntaxHighlighter
+                  language={language}
+                  style={oneDark}
+                  showLineNumbers
+                  wrapLines
+                >
+                  {content}
+                </SyntaxHighlighter>
+              </div>
+            </>
           )}
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && selectedLines && (
+        <CodeSnippetShare
+          repo={repo}
+          file={file}
+          selectedCode={getSelectedCode()}
+          selectedLines={selectedLines}
+          language={language}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   )
 }
