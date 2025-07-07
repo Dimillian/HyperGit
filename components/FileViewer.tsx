@@ -40,6 +40,18 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
     loadFileContent()
   }, [github, repo, file])
 
+  // Handle escape key to close
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(content)
