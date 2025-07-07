@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { GitHubRepo, GitHubFile } from '@/lib/github/api'
+import { fileTreeCache } from '@/lib/github/cache'
 import { Search, GitBranch, File, Folder } from 'lucide-react'
 import { useGitHub } from '@/hooks/useGitHub'
 
@@ -19,6 +20,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
   const [searchResults, setSearchResults] = useState<GitHubFile[]>([])
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isSearching, setIsSearching] = useState(false)
+  const [isCacheBuilding, setIsCacheBuilding] = useState(false)
   
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -49,18 +51,45 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     setMode('files')
     setQuery(beforeAt + '@' + repo.name + '/')
     setSelectedIndex(0)
-    setIsSearching(true)
     
-    // Load root files immediately
     try {
-      const repoInfo = { owner: repo.full_name.split('/')[0], repo: repo.name }
-      const files = await github!.getRepositoryContents(repoInfo.owner, repoInfo.repo, '')
-      setSearchResults(files)
+      // Check cache first
+      let files = fileTreeCache.get(repo.full_name)
+      
+      if (!files) {
+        // If not in cache, try loading from localStorage
+        files = fileTreeCache.loadFromStorage(repo.full_name)
+        
+        if (!files) {
+          // If not in storage, fetch from API
+          setIsCacheBuilding(true)
+          const repoInfo = { owner: repo.full_name.split('/')[0], repo: repo.name }
+          files = await github!.getRepositoryTree(repoInfo.owner, repoInfo.repo)
+          
+          // Cache the results
+          fileTreeCache.set(repo.full_name, files)
+          setIsCacheBuilding(false)
+        } else {
+          // Re-cache from storage
+          fileTreeCache.set(repo.full_name, files)
+        }
+      }
+      
+      // Show root files only
+      const rootFiles = files.filter(file => !file.path.includes('/'))
+      setSearchResults(rootFiles)
     } catch (error) {
-      console.error('Failed to load root files:', error)
-      setSearchResults([])
-    } finally {
-      setIsSearching(false)
+      console.error('Failed to load repository tree:', error)
+      setIsCacheBuilding(false)
+      // Fallback to old method
+      try {
+        const repoInfo = { owner: repo.full_name.split('/')[0], repo: repo.name }
+        const files = await github!.getRepositoryContents(repoInfo.owner, repoInfo.repo, '')
+        setSearchResults(files)
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError)
+        setSearchResults([])
+      }
     }
     
     // If from card click, also trigger the callback and open dropdown
@@ -84,32 +113,38 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
 
   // Handle file search when in file mode
   useEffect(() => {
-    if (mode === 'files' && selectedRepo && github) {
+    if (mode === 'files' && selectedRepo) {
       const pathQuery = afterAt.split('/').slice(1).join('/')
       
       if (pathQuery.length > 0) {
-        setIsSearching(true)
-        
-        const searchTimeout = setTimeout(async () => {
+        // Use local search with shorter debounce
+        const searchTimeout = setTimeout(() => {
+          setIsSearching(true)
+          
           try {
-            const repoInfo = { owner: selectedRepo.full_name.split('/')[0], repo: selectedRepo.name }
-            const files = await github.searchRepositoryFiles(repoInfo.owner, repoInfo.repo, pathQuery)
-            setSearchResults(files)
+            // Search in cached files
+            const results = fileTreeCache.searchFiles(selectedRepo.full_name, pathQuery)
+            setSearchResults(results)
           } catch (error) {
             console.error('Search failed:', error)
             setSearchResults([])
           } finally {
             setIsSearching(false)
           }
-        }, 300)
+        }, 100) // Reduced from 300ms to 100ms
 
         return () => clearTimeout(searchTimeout)
       } else {
-        setSearchResults([])
+        // Show root files when no search query
+        const cachedFiles = fileTreeCache.get(selectedRepo.full_name)
+        if (cachedFiles) {
+          const rootFiles = cachedFiles.filter(file => !file.path.includes('/'))
+          setSearchResults(rootFiles)
+        }
         setIsSearching(false)
       }
     }
-  }, [afterAt, mode, selectedRepo, github])
+  }, [afterAt, mode, selectedRepo])
 
   // Keyboard navigation
   useEffect(() => {
@@ -251,7 +286,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
           ) : (
             <>
               <div className="p-4 border-b border-[var(--dark-border)] text-sm font-medium text-[var(--neon-purple)] flex items-center justify-between">
-                <span>{selectedRepo?.name} - {isSearching ? 'Searching...' : 'Files'}</span>
+                <span>{selectedRepo?.name} - {isCacheBuilding ? 'Loading files...' : isSearching ? 'Searching...' : 'Files'}</span>
                 <button
                   onClick={() => {
                     setMode('repos')
@@ -263,10 +298,20 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
                   ← Back
                 </button>
               </div>
-              {isSearching ? (
+              {isCacheBuilding ? (
+                <div className="p-4 text-[var(--dark-text-secondary)] text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[var(--neon-purple)]"></div>
+                    Building search index...
+                  </div>
+                  <p className="text-xs text-[var(--dark-text-secondary)]/70">
+                    This only happens once per repository
+                  </p>
+                </div>
+              ) : isSearching ? (
                 <div className="p-4 text-[var(--dark-text-secondary)] text-center flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[var(--neon-purple)]"></div>
-                  Searching repository...
+                  Searching...
                 </div>
               ) : searchResults.length === 0 ? (
                 <div className="p-4 text-[var(--dark-text-secondary)] text-center">

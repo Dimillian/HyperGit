@@ -76,6 +76,45 @@ export class GitHubAPI {
     return this.request<GitHubRepo>(`/repos/${owner}/${repo}`)
   }
 
+  // Get complete repository file tree using Git Trees API
+  async getRepositoryTree(owner: string, repo: string): Promise<GitHubFile[]> {
+    try {
+      // First get the default branch to find the tree SHA
+      const repoInfo = await this.getRepository(owner, repo)
+      const defaultBranch = repoInfo.default_branch
+
+      // Get the branch reference
+      const branchRef = await this.request<{
+        object: { sha: string }
+      }>(`/repos/${owner}/${repo}/git/refs/heads/${defaultBranch}`)
+
+      // Get the tree recursively
+      const tree = await this.request<{
+        tree: Array<{
+          path: string
+          type: string
+          sha: string
+          size?: number
+        }>
+      }>(`/repos/${owner}/${repo}/git/trees/${branchRef.object.sha}?recursive=1`)
+
+      // Convert tree items to GitHubFile format, filtering only files
+      return tree.tree
+        .filter(item => item.type === 'blob') // 'blob' means file in git
+        .map(item => ({
+          name: item.path.split('/').pop() || item.path,
+          path: item.path,
+          type: 'file' as const,
+          size: item.size,
+          sha: item.sha,
+          download_url: `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/${item.path}`
+        }))
+    } catch (error) {
+      console.error('Error fetching repository tree:', error)
+      throw error
+    }
+  }
+
   // Get repository contents (files and directories)
   async getRepositoryContents(
     owner: string, 
