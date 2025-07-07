@@ -6,15 +6,22 @@ export function useGitHub() {
   const [repositories, setRepositories] = useState<GitHubRepo[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isInitializing, setIsInitializing] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem('github_token')
-    if (token) {
-      setGitHub(new GitHubAPI(token))
-      loadRepositories(token)
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('github_token')
+      if (token) {
+        setGitHub(new GitHubAPI(token))
+        await loadRepositories(token)
+      }
+      setIsInitializing(false)
     }
 
+    initializeAuth()
+
     const handleStorageChange = () => {
+      const token = localStorage.getItem('github_token')
       const newToken = localStorage.getItem('github_token')
       if (newToken && newToken !== token) {
         setGitHub(new GitHubAPI(newToken))
@@ -61,6 +68,7 @@ export function useGitHub() {
     error,
     setToken,
     clearToken,
-    isAuthenticated: !!github
+    isAuthenticated: !!github,
+    isInitializing
   }
 }

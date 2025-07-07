@@ -8,13 +8,14 @@ import SearchBar from '@/components/SearchBar'
 import FileViewer from '@/components/FileViewer'
 import AuthPrompt from '@/components/AuthPrompt'
 import RecentFiles from '@/components/RecentFiles'
+import LoadingScreen from '@/components/LoadingScreen'
 import { LogOut, GitBranch, Clock, File } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile } | null>(null)
   const [recentFilesKey, setRecentFilesKey] = useState(0)
-  const { isAuthenticated, repositories, clearToken, loading } = useGitHub()
+  const { isAuthenticated, repositories, clearToken, loading, isInitializing } = useGitHub()
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile) => {
     // Track the file visit
@@ -96,6 +97,12 @@ export default function Home() {
     )
   }
 
+  // Show loading screen while initializing
+  if (isInitializing) {
+    return <LoadingScreen />
+  }
+
+  // Show login screen if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
