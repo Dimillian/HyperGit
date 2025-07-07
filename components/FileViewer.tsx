@@ -129,6 +129,25 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
                 lineHeight: '1.6',
                 borderRadius: '0 0 1rem 1rem'
               }}
+              lineNumberStyle={{
+                minWidth: '3em',
+                paddingRight: '1em',
+                textAlign: 'right',
+                userSelect: 'none',
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--dark-text-secondary)',
+                outline: 'none',
+                boxShadow: 'none'
+              }}
+              lineProps={{
+                style: {
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  boxShadow: 'none'
+                }
+              }}
             >
               {content}
             </SyntaxHighlighter>

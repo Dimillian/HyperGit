@@ -63,4 +63,79 @@
     backdrop-filter: blur(10px);
     border: 1px solid rgba(168, 85, 247, 0.2);
   }
+
+  .shimmer {
+    background: linear-gradient(90deg, 
+      rgba(255, 255, 255, 0.05) 0%, 
+      rgba(168, 85, 247, 0.1) 50%, 
+      rgba(255, 255, 255, 0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Remove syntax highlighter line highlighting - comprehensive override */
+  pre[class*="language-"] span[style*="background"],
+  pre[class*="language-"] .token-line,
+  pre[class*="language-"] .linenumber,
+  .react-syntax-highlighter span[style*="background"],
+  .react-syntax-highlighter .token-line,
+  .react-syntax-highlighter .linenumber,
+  .prism-code span[style*="background"],
+  .prism-code .token-line,
+  .prism-code .linenumber {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove any hover effects */
+  pre[class*="language-"] span:hover,
+  .react-syntax-highlighter span:hover,
+  .prism-code span:hover {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Remove line highlighting on wrapped lines */
+  .react-syntax-highlighter > pre > code > span,
+  pre[class*="language-"] > code > span {
+    background: transparent !important;
+    display: block;
+    border: none !important;
+    outline: none !important;
+    outline-color: transparent !important;
+    outline-width: 0 !important;
+    outline-style: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Target all syntax highlighter elements */
+  .react-syntax-highlighter *,
+  pre[class*="language-"] *,
+  .prism-code * {
+    outline: none !important;
+    outline-color: transparent !important;
+    outline-width: 0 !important;
+    outline-style: none !important;
+    border: none !important;
+    border-color: transparent !important;
+    border-width: 0 !important;
+    border-style: none !important;
+    border-top-color: transparent !important;
+    border-right-color: transparent !important;
+    border-bottom-color: transparent !important;
+    border-left-color: transparent !important;
+  }
 }

@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { GitHubRepo, GitHubFile } from '@/lib/github/api'
 import { Search, GitBranch, File, Folder } from 'lucide-react'
 import { useGitHub } from '@/hooks/useGitHub'
 
 interface SearchBarProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile) => void
+  onRepoSelect?: (repo: GitHubRepo) => void
 }
 
-export default function SearchBar({ onFileSelect }: SearchBarProps) {
+const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => void }, SearchBarProps>(
+  function SearchBar({ onFileSelect, onRepoSelect }, ref) {
   const [query, setQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [mode, setMode] = useState<'repos' | 'files'>('repos')
@@ -42,14 +44,43 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
   )
 
   // Handle repository selection
-  const selectRepository = async (repo: GitHubRepo) => {
+  const selectRepository = async (repo: GitHubRepo, fromCard = false) => {
     setSelectedRepo(repo)
     setMode('files')
     setQuery(beforeAt + '@' + repo.name + '/')
     setSelectedIndex(0)
-    setSearchResults([])
+    setIsSearching(true)
+    
+    // Load root files immediately
+    try {
+      const repoInfo = { owner: repo.full_name.split('/')[0], repo: repo.name }
+      const files = await github!.getRepositoryContents(repoInfo.owner, repoInfo.repo, '')
+      setSearchResults(files)
+    } catch (error) {
+      console.error('Failed to load root files:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+    
+    // If from card click, also trigger the callback and open dropdown
+    if (fromCard && onRepoSelect) {
+      onRepoSelect(repo)
+      setIsDropdownOpen(true)
+    }
+    
     inputRef.current?.focus()
   }
+
+  // Public method to select repository from external component
+  const selectRepositoryFromCard = (repo: GitHubRepo) => {
+    selectRepository(repo, true)
+  }
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    selectRepositoryFromCard
+  }))
 
   // Handle file search when in file mode
   useEffect(() => {
@@ -242,29 +273,34 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
                   {afterAt.split('/').slice(1).join('/') ? 'No files found' : 'Start typing to search files'}
                 </div>
               ) : (
-                searchResults.map((file, index) => (
-                  <div
-                    key={file.path}
-                    data-dropdown-item
-                    className={`flex items-start gap-3 p-4 cursor-pointer transition-all duration-200 ${
-                      index === selectedIndex ? 'bg-[var(--neon-purple)]/20 text-[var(--neon-purple-bright)] border-l-2 border-[var(--neon-purple)]' : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)]'
-                    }`}
-                    onClick={() => {
-                      onFileSelect(selectedRepo!, file)
-                      setIsDropdownOpen(false)
-                    }}
-                  >
-                    <File className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                      index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
-                    }`} />
-                    <div className="flex-1 min-w-0 text-left">
-                      <div className="font-medium truncate text-left">{file.name}</div>
-                      <div className={`text-sm truncate text-left ${
-                        index === selectedIndex ? 'text-[var(--neon-purple)]/70' : 'text-[var(--dark-text-secondary)]'
-                      }`}>{file.path}</div>
+                searchResults.map((file, index) => {
+                  const isRootFileView = !afterAt.split('/').slice(1).join('/')
+                  return (
+                    <div
+                      key={file.path}
+                      data-dropdown-item
+                      className={`flex items-start gap-3 ${isRootFileView ? 'p-3' : 'p-4'} cursor-pointer transition-all duration-200 ${
+                        index === selectedIndex ? 'bg-[var(--neon-purple)]/20 text-[var(--neon-purple-bright)] border-l-2 border-[var(--neon-purple)]' : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)]'
+                      }`}
+                      onClick={() => {
+                        onFileSelect(selectedRepo!, file)
+                        setIsDropdownOpen(false)
+                      }}
+                    >
+                      <File className={`w-4 h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
+                        index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
+                      }`} />
+                      <div className="flex-1 min-w-0 text-left">
+                        <div className="font-medium truncate text-left">{file.name}</div>
+                        {!isRootFileView && (
+                          <div className={`text-sm truncate text-left ${
+                            index === selectedIndex ? 'text-[var(--neon-purple)]/70' : 'text-[var(--dark-text-secondary)]'
+                          }`}>{file.path}</div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )
+                })
               )}
             </>
           )}
@@ -272,4 +308,6 @@ export default function SearchBar({ onFileSelect }: SearchBarProps) {
       )}
     </div>
   )
-}
+})
+
+export default SearchBar

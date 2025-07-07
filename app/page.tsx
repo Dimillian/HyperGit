@@ -10,10 +10,14 @@ import { Github, LogOut } from 'lucide-react'
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile } | null>(null)
-  const { isAuthenticated, repositories, clearToken } = useGitHub()
+  const { isAuthenticated, repositories, clearToken, loading } = useGitHub()
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile) => {
     setSelectedFile({ repo, file })
+  }
+
+  const handleRepoSelect = (repo: GitHubRepo) => {
+    // This will be handled by the SearchBar component
   }
 
   if (!isAuthenticated) {
@@ -64,19 +68,45 @@ export default function Home() {
               </p>
             </div>
 
-            <SearchBar onFileSelect={handleFileSelect} />
+            <SearchBar 
+              onFileSelect={handleFileSelect} 
+              onRepoSelect={handleRepoSelect}
+              ref={(ref) => { if (ref) window.searchBarRef = ref }}
+            />
 
-            {repositories.length > 0 && (
-              <div className="mt-12">
-                <p className="text-[var(--dark-text-secondary)] mb-4">
-                  Quick tip: Type <code className="bg-[var(--dark-bg-tertiary)] text-[var(--neon-purple)] px-2 py-1 rounded text-sm border border-[var(--neon-purple)]/30">@repo-name/filename</code> to search
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-                  {repositories.slice(0, 6).map((repo) => (
+            <div className="mt-12">
+              <p className="text-[var(--dark-text-secondary)] mb-4">
+                Quick tip: Type <code className="bg-[var(--dark-bg-tertiary)] text-[var(--neon-purple)] px-2 py-1 rounded text-sm border border-[var(--neon-purple)]/30">@repo-name/filename</code> to search
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                {loading ? (
+                  // Shimmer loading cards
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] shimmer"
+                    >
+                      <div className="h-5 bg-gray-300/20 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-300/20 rounded mb-1 w-3/4"></div>
+                      <div className="h-4 bg-gray-300/20 rounded mb-3 w-1/2"></div>
+                      <div className="flex items-center justify-between">
+                        <div className="h-3 bg-gray-300/20 rounded w-16"></div>
+                        <div className="h-3 bg-gray-300/20 rounded w-20"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : repositories.length > 0 ? (
+                  // Actual repository cards
+                  repositories.slice(0, 6).map((repo) => (
                     <div
                       key={repo.full_name}
-                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover"
+                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer"
+                      onClick={() => {
+                        if (window.searchBarRef?.selectRepositoryFromCard) {
+                          window.searchBarRef.selectRepositoryFromCard(repo)
+                        }
+                      }}
                     >
                       <h3 className="font-medium text-[var(--dark-text)] truncate">{repo.name}</h3>
                       <p className="text-sm text-[var(--dark-text-secondary)] mt-1 line-clamp-2">
@@ -89,10 +119,10 @@ export default function Home() {
                         </span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  ))
+                ) : null}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </main>
