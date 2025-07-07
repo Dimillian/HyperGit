@@ -54,6 +54,14 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     setSelectedIndex(0)
     setCurrentPath('') // Reset to root when selecting a repo
     
+    // If from card click, open dropdown immediately to show loading state
+    if (fromCard) {
+      setIsDropdownOpen(true)
+      if (onRepoSelect) {
+        onRepoSelect(repo)
+      }
+    }
+    
     try {
       // Check cache first
       let files = fileTreeCache.get(repo.full_name)
@@ -92,12 +100,6 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
         console.error('Fallback also failed:', fallbackError)
         setSearchResults([])
       }
-    }
-    
-    // If from card click, also trigger the callback and open dropdown
-    if (fromCard && onRepoSelect) {
-      onRepoSelect(repo)
-      setIsDropdownOpen(true)
     }
     
     inputRef.current?.focus()
