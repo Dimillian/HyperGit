@@ -20,6 +20,9 @@
 - [x] Search history and recent files (Recently Browsed Files section)
 - [x] Fuzzy search improvements (integrated Fuse.js)
 - [x] Auto-scroll on keyboard navigation
+- [x] Folder browsing and navigation within repositories
+- [x] Breadcrumb navigation for folder structure
+- [x] Search bar reset when file viewer is closed
 - [ ] Advanced search filters (file type, date modified, size)
 - [ ] Search across multiple repositories simultaneously
 
@@ -93,6 +96,8 @@
 - [x] Fixed syntax highlighter line outline issues
 - [x] Fixed search dropdown content alignment
 - [x] Fixed shimmer placeholder colors for dark theme
+- [x] Fixed search bar not resetting after closing file viewer
+- [x] Fixed dropdown not reopening properly after search bar reset
 - [ ] Handle rate limiting gracefully
 - [ ] Improve error messages for network failures
 - [ ] Handle very large files (>1MB)

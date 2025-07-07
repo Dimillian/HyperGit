@@ -327,6 +327,21 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     }
   }, [query])
 
+  // Handle dropdown visibility based on query content
+  useEffect(() => {
+    if (isAuthenticated && inputRef.current === document.activeElement) {
+      const hasAtSymbol = query.includes('@')
+      const isEmpty = query.trim() === ''
+      
+      // Show dropdown if:
+      // 1. Query is empty (show repos)
+      // 2. Query contains @ (show repos or files)
+      // 3. We're in file mode (already selected a repo)
+      const shouldShowDropdown = isEmpty || hasAtSymbol || mode === 'files'
+      setIsDropdownOpen(shouldShowDropdown)
+    }
+  }, [query, isAuthenticated, mode])
+
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <div className="relative">
@@ -338,7 +353,12 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {
             if (isAuthenticated) {
-              setIsDropdownOpen(true)
+              // Determine if dropdown should be shown based on current state
+              const hasAtSymbol = query.includes('@')
+              const isEmpty = query.trim() === ''
+              const shouldShowDropdown = isEmpty || hasAtSymbol || mode === 'files'
+              setIsDropdownOpen(shouldShowDropdown)
+              
               // If we're in file mode but have no search results, show the folder contents
               if (mode === 'files' && selectedRepo && searchResults.length === 0) {
                 const cachedFiles = fileTreeCache.get(selectedRepo.full_name)
