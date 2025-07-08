@@ -7,8 +7,10 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 ## ✨ Features
 
 - **@-mention search**: Type `@repo-name/filename` to instantly find files
+- **Branch switching**: Use `@repo-name:branch-name/filename` syntax to search specific branches
 - **Folder browsing**: Navigate repository structure manually with breadcrumb navigation
 - **Code snippet sharing**: Select lines of code and generate beautiful screenshots for social media
+- **Recent code snippets**: Save and manage code snippets with syntax highlighting and quick access
 - **Two-stage navigation**: Browse repositories → explore folders → search files
 - **GitHub OAuth**: One-click authentication with GitHub (or use Personal Access Tokens)
 - **Dark theme**: Sleek black interface with neon purple accents
@@ -17,7 +19,8 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 - **Glass effects**: Shiny, reactive UI with backdrop blur and neon glows
 - **Smart caching**: Lightning-fast search with intelligent file tree caching
 - **Language icons**: Professional programming language icons from Simple Icons
-- **Recent files**: Track and quickly access recently viewed files
+- **Recent files**: Track and quickly access recently viewed files with branch awareness
+- **Snippet library**: Personal collection of saved code snippets with search and management
 - **Responsive design**: Works perfectly on desktop and mobile
 - **Private repos**: Access your private repositories securely
 
@@ -72,6 +75,12 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 3. Type `/` followed by filename to search within the repo
 4. Click any file to view with syntax highlighting
 
+### Branch-Specific Search
+1. Type `@repo-name:` to see available branches
+2. Select a branch to search within that specific branch
+3. Continue with `/filename` to search files on that branch
+4. All recent files and snippets are tracked per branch
+
 ### Folder Browsing
 1. Select a repository to enter folder browsing mode
 2. Click folder icons to navigate into directories
@@ -87,21 +96,25 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 
 ### Example Searches
 - `@my-app` - Find "my-app" repository
-- `@my-app/component` - Search for files containing "component"
+- `@my-app:main/component` - Search for files containing "component" on main branch
+- `@my-app:feature-branch/utils` - Search files on specific branch
 - `@my-app/src/utils.ts` - Find specific file path
 
 ### Smart Features
-- **Recent Files**: Automatically tracks your recently viewed files
-- **File Tree Caching**: Repository structure is cached for instant browsing
+- **Recent Files**: Automatically tracks your recently viewed files with branch awareness
+- **Recent Snippets**: Personal library of saved code snippets with syntax highlighting
+- **File Tree Caching**: Repository structure is cached for instant browsing (per branch)
 - **Search Reset**: File viewer automatically resets search bar when closed
 
-### Code Snippet Sharing
-1. Open any file in the file viewer
+### Code Snippet Features
+1. **Sharing**: Open any file in the file viewer
 2. Select lines of code by clicking and dragging
-3. Click the "Share Snippet" button that appears
-4. Generate a beautiful screenshot for social media
-5. Download the image or share directly to Twitter/LinkedIn
-6. Copy GitHub links with line highlighting
+3. Click "Save Snippet" to add to your personal library
+4. Click "Share Snippet" to generate beautiful screenshots for social media
+5. **Managing**: Access your snippet library from the homepage
+6. Click any snippet to view with syntax highlighting
+7. Copy code, generate screenshots, or view on GitHub
+8. Remove snippets you no longer need
 
 ## 🛠️ Tech Stack
 
@@ -127,9 +140,11 @@ HyperGit/
 │   └── page.tsx             # Main page with language icons
 ├── components/              # React components
 │   ├── AuthPrompt.tsx       # GitHub OAuth + token auth
-│   ├── FileViewer.tsx       # File display modal with line selection and sharing
+│   ├── FileViewer.tsx       # File display modal with line selection, saving, and sharing
 │   ├── CodeSnippetShare.tsx # Screenshot generation for social media sharing
-│   ├── RecentFiles.tsx      # Recent files tracking with language icons
+│   ├── SnippetViewer.tsx    # Snippet modal with syntax highlighting and actions
+│   ├── RecentFiles.tsx      # Recent files tracking with branch awareness
+│   ├── RecentSnippets.tsx   # Snippet library with syntax highlighting previews
 │   ├── SearchBar.tsx        # Main search interface (refactored)
 │   └── SearchBar/           # Modular SearchBar components
 │       ├── components/      # UI components

@@ -7,6 +7,7 @@
 - ✅ **Branch Autocomplete**: Type `:` after repo name to see and select available branches with commit dates
 - ✅ **Branch-Aware Caching**: Separate file tree cache for each branch
 - ✅ **Branch-Aware Recent Files**: Track files per branch, allowing multiple entries for same file on different branches
+- ✅ **Recent Code Snippets**: Save, view, and manage code snippets with syntax highlighting and screenshot generation
 - ✅ **Repository Sorting**: Fixed repository sorting to use `pushed_at` for accurate activity-based ordering
 - ✅ **Repository Card UI**: Enhanced layout with footer alignment and date pastilles with relative time
 - ✅ **Folder Browsing**: Complete repository folder navigation with breadcrumb support
@@ -18,14 +19,15 @@
 
 ### Code Quality Improvements
 - ✅ Created reusable hooks: `useDropdownVisibility`, `useKeyboardNavigation`
-- ✅ Extracted UI components: `RepositoryDropdown`, `FileDropdown`, `BranchDropdown`, `CodeSnippetShare`
+- ✅ Extracted UI components: `RepositoryDropdown`, `FileDropdown`, `BranchDropdown`, `CodeSnippetShare`, `SnippetViewer`, `RecentSnippets`
 - ✅ Added utility functions: `folderUtils.ts` with branch-aware parsing and navigation helpers
-- ✅ Enhanced FileViewer with line selection, sharing capabilities, and branch-aware file loading
+- ✅ Enhanced FileViewer with line selection, sharing capabilities, snippet saving, and branch-aware file loading
+- ✅ Created snippet management system: `recentSnippets.ts` with smart title generation and branch tracking
 - ✅ Updated RecentFiles system with branch tracking and display
 - ✅ Improved repository card layout with flexbox and proper footer alignment
 - ✅ Added relative time formatting for repository cards and branch lists
 - ✅ Enhanced GitHub API with `pushed_at` field and proper repository sorting
-- ✅ Improved TypeScript types and interfaces (added GitHubBranch type, updated RecentFile interface)
+- ✅ Improved TypeScript types and interfaces (added GitHubBranch type, updated RecentFile interface, added RecentSnippet interface)
 - ✅ Better separation of concerns and maintainability
 - ✅ Branch-specific API integration in GitHubAPI class
 
@@ -48,6 +50,7 @@
 - [x] Auto-populate search bar when clicking repository cards
 - [x] Search history and recent files (Recently Browsed Files section)
 - [x] Branch-aware recent files (separate entries for same file on different branches)
+- [x] Recent code snippets with syntax highlighting and management features
 - [x] Fuzzy search improvements (integrated Fuse.js)
 - [x] Auto-scroll on keyboard navigation
 - [x] Folder browsing and navigation within repositories
@@ -115,6 +118,7 @@
 ### Collaboration
 - [x] Share file links with line highlighting (via code snippet sharing)
 - [x] Social media sharing with beautiful screenshots
+- [x] Code snippet library with save, view, copy, and screenshot features
 - [ ] Create GitHub gists from file selections
 - [ ] Comment on files (via GitHub API)
 - [ ] File comparison tool

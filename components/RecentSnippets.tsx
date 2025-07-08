@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
+import { GitHubRepo, GitHubFile } from '@/lib/github/api'
 import { RecentSnippet, RecentSnippetsManager } from '@/lib/recentSnippets'
-import { Code, Clock, X, Copy, ExternalLink, CheckCircle, Eye } from 'lucide-react'
+import { Code, X, Copy, ExternalLink, CheckCircle, Eye } from 'lucide-react'
 import SnippetViewer from './SnippetViewer'
 import * as SimpleIcons from 'simple-icons'
 
