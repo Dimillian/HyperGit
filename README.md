@@ -21,7 +21,9 @@ HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly s
 - **Language icons**: Professional programming language icons from Simple Icons
 - **Recent files**: Track and quickly access recently viewed files with branch awareness
 - **Snippet library**: Personal collection of saved code snippets with search and management
-- **Responsive design**: Works perfectly on desktop and mobile
+- **Responsive design**: Works perfectly on desktop and mobile with optimized touch targets
+- **Mobile-first**: Enhanced mobile experience with proper touch interactions and responsive layouts
+- **Interactive cards**: Mouse-following shine effects for engaging hover experiences
 - **Private repos**: Access your private repositories securely
 
 ## 🚀 Quick Start
@@ -141,15 +143,27 @@ HyperGit/
 ├── components/              # React components
 │   ├── AuthPrompt.tsx       # GitHub OAuth + token auth
 │   ├── FileViewer.tsx       # File display modal with line selection, saving, and sharing
-│   ├── CodeSnippetShare.tsx # Screenshot generation for social media sharing
+│   ├── Footer.tsx           # Reusable footer component
+│   ├── LoadingScreen.tsx    # Loading screen component
 │   ├── SnippetViewer.tsx    # Snippet modal with syntax highlighting and actions
-│   ├── RecentFiles.tsx      # Recent files tracking with branch awareness
-│   ├── RecentSnippets.tsx   # Snippet library with syntax highlighting previews
-│   ├── SearchBar.tsx        # Main search interface (refactored)
+│   ├── Card/                # Card-related components (organized)
+│   │   ├── components/      # Card implementation components
+│   │   │   ├── RecentFiles.tsx      # Recent files tracking with branch awareness
+│   │   │   ├── RecentSnippets.tsx   # Snippet library with syntax highlighting previews
+│   │   │   └── index.ts             # Component exports
+│   │   ├── ui/              # Shared card UI components
+│   │   │   ├── CardActions.tsx      # Reusable action buttons
+│   │   │   ├── FilePathDisplay.tsx  # Consistent path formatting
+│   │   │   ├── LanguageIcon.tsx     # Programming language icons
+│   │   │   ├── ShineCard.tsx        # Interactive hover effects
+│   │   │   ├── TimePill.tsx         # Consistent time display
+│   │   │   └── index.ts             # UI component exports
+│   │   └── index.ts         # Main card exports
 │   └── SearchBar/           # Modular SearchBar components
 │       ├── components/      # UI components
 │       │   ├── RepositoryDropdown.tsx
-│       │   └── FileDropdown.tsx
+│       │   ├── FileDropdown.tsx
+│       │   └── BranchDropdown.tsx
 │       ├── hooks/           # Custom hooks
 │       │   ├── useDropdownVisibility.ts
 │       │   └── useKeyboardNavigation.ts
@@ -161,7 +175,8 @@ HyperGit/
 │   ├── github/
 │   │   ├── api.ts           # GitHub API client
 │   │   └── cache.ts         # File tree caching system
-│   └── recentFiles.ts       # Recent files management
+│   ├── recentFiles.ts       # Recent files management
+│   └── recentSnippets.ts    # Recent snippets management
 ├── global.d.ts              # TypeScript global definitions
 ├── .env.example             # Environment variables template
 ├── TODO.md                  # Development roadmap
