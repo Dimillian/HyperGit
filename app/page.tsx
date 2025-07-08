@@ -18,8 +18,8 @@ export default function Home() {
   const { isAuthenticated, repositories, clearToken, loading, isInitializing } = useGitHub()
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile, branch?: string) => {
-    // Track the file visit
-    RecentFilesManager.addRecentFile(repo, file)
+    // Track the file visit with branch information
+    RecentFilesManager.addRecentFile(repo, file, branch || repo.default_branch)
     
     // Force re-render of recent files component
     setRecentFilesKey(prev => prev + 1)

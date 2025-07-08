@@ -7,7 +7,7 @@ import { File, Clock, X } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
 
 interface RecentFilesProps {
-  onFileSelect: (repo: GitHubRepo, file: GitHubFile) => void
+  onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
 }
 
 export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
@@ -38,9 +38,9 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
   }
 
   // Remove a file from recent files
-  const removeRecentFile = (repo: GitHubRepo, file: GitHubFile, e: React.MouseEvent) => {
+  const removeRecentFile = (repo: GitHubRepo, file: GitHubFile, branch: string, e: React.MouseEvent) => {
     e.stopPropagation() // Prevent triggering the card click
-    RecentFilesManager.removeRecentFile(repo, file)
+    RecentFilesManager.removeRecentFile(repo, file, branch)
     refreshRecentFiles()
   }
 
@@ -137,20 +137,20 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {recentFiles.map((recentFile, index) => {
-          const { file, repo, timestamp } = recentFile
+          const { file, repo, branch, timestamp } = recentFile
           const language = getFileLanguage(file.name)
           const extension = getFileExtension(file.name)
           const languageIcon = getLanguageIcon(file.name)
           
           return (
             <div
-              key={`${repo.full_name}-${file.path}-${timestamp}`}
+              key={`${repo.full_name}-${file.path}-${branch}-${timestamp}`}
               className="glass-effect p-4 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer group relative"
-              onClick={() => onFileSelect(repo, file)}
+              onClick={() => onFileSelect(repo, file, branch)}
             >
               {/* Remove button */}
               <button
-                onClick={(e) => removeRecentFile(repo, file, e)}
+                onClick={(e) => removeRecentFile(repo, file, branch, e)}
                 className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
               >
                 <X className="w-3 h-3" />
@@ -161,7 +161,11 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
                 <div className="flex-1 min-w-0 text-left">
                   <div className="font-medium text-[var(--dark-text)] truncate text-left">{file.name}</div>
                   <div className="text-xs text-[var(--dark-text-secondary)] truncate mt-1 text-left">
-                    {repo.name}/{file.path}
+                    {repo.name}
+                    {branch && branch !== repo.default_branch && (
+                      <span className="text-[var(--neon-purple)] mx-1">:{branch}</span>
+                    )}
+                    /{file.path}
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-[var(--neon-purple)] bg-[var(--neon-purple)]/10 rounded flex items-center gap-1">

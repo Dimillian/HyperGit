@@ -3,6 +3,7 @@ import { GitHubRepo, GitHubFile } from './github/api'
 export interface RecentFile {
   file: GitHubFile
   repo: GitHubRepo
+  branch: string
   timestamp: number
 }
 
@@ -27,19 +28,20 @@ export class RecentFilesManager {
   }
 
   // Add a file to recent files
-  static addRecentFile(repo: GitHubRepo, file: GitHubFile): void {
+  static addRecentFile(repo: GitHubRepo, file: GitHubFile, branch: string = repo.default_branch): void {
     try {
       const currentFiles = this.getRecentFiles()
       
-      // Remove existing entry for this file if it exists
+      // Remove existing entry for this file+branch combination if it exists
       const filteredFiles = currentFiles.filter(
-        item => !(item.file.path === file.path && item.repo.full_name === repo.full_name)
+        item => !(item.file.path === file.path && item.repo.full_name === repo.full_name && item.branch === branch)
       )
       
       // Add new entry at the beginning
       const newRecentFile: RecentFile = {
         file,
         repo,
+        branch,
         timestamp: Date.now()
       }
       
@@ -61,11 +63,11 @@ export class RecentFilesManager {
   }
 
   // Remove a specific recent file
-  static removeRecentFile(repo: GitHubRepo, file: GitHubFile): void {
+  static removeRecentFile(repo: GitHubRepo, file: GitHubFile, branch: string = repo.default_branch): void {
     try {
       const currentFiles = this.getRecentFiles()
       const filteredFiles = currentFiles.filter(
-        item => !(item.file.path === file.path && item.repo.full_name === repo.full_name)
+        item => !(item.file.path === file.path && item.repo.full_name === repo.full_name && item.branch === branch)
       )
       
       localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(filteredFiles))

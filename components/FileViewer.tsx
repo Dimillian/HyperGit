@@ -162,7 +162,13 @@ export default function FileViewer({ repo, file, branch, onClose }: FileViewerPr
             <File className="w-6 h-6 text-[var(--neon-purple)]" />
             <div>
               <h2 className="font-semibold text-xl text-[var(--dark-text)]">{file.name}</h2>
-              <p className="text-sm text-[var(--dark-text-secondary)]">{repo.full_name}/{file.path}</p>
+              <p className="text-sm text-[var(--dark-text-secondary)]">
+                {repo.full_name}
+                {branch && branch !== repo.default_branch && (
+                  <span className="text-[var(--neon-purple)] mx-1">:{branch}</span>
+                )}
+                /{file.path}
+              </p>
             </div>
           </div>
           
@@ -207,7 +213,7 @@ export default function FileViewer({ repo, file, branch, onClose }: FileViewerPr
             )}
             
             <a
-              href={`https://github.com/${repo.full_name}/blob/${repo.default_branch}/${file.path}`}
+              href={`https://github.com/${repo.full_name}/blob/${branch || repo.default_branch}/${file.path}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 text-sm bg-[var(--neon-purple)] text-white hover:bg-[var(--neon-purple-bright)] rounded-lg transition-all duration-200 neon-glow-hover"

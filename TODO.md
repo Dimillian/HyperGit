@@ -4,8 +4,11 @@
 
 ### Major Features Added (Latest Session)
 - ✅ **Branch/Tag Switching**: Complete branch switching with syntax `@repo:branch/file` and autocomplete
-- ✅ **Branch Autocomplete**: Type `:` after repo name to see and select available branches
+- ✅ **Branch Autocomplete**: Type `:` after repo name to see and select available branches with commit dates
 - ✅ **Branch-Aware Caching**: Separate file tree cache for each branch
+- ✅ **Branch-Aware Recent Files**: Track files per branch, allowing multiple entries for same file on different branches
+- ✅ **Repository Sorting**: Fixed repository sorting to use `pushed_at` for accurate activity-based ordering
+- ✅ **Repository Card UI**: Enhanced layout with footer alignment and date pastilles with relative time
 - ✅ **Folder Browsing**: Complete repository folder navigation with breadcrumb support
 - ✅ **Component Refactoring**: Reduced SearchBar complexity from 538 to 307 lines (~43% reduction)
 - ✅ **Modular Architecture**: Extracted hooks, components, and utilities for better maintainability
@@ -18,7 +21,11 @@
 - ✅ Extracted UI components: `RepositoryDropdown`, `FileDropdown`, `BranchDropdown`, `CodeSnippetShare`
 - ✅ Added utility functions: `folderUtils.ts` with branch-aware parsing and navigation helpers
 - ✅ Enhanced FileViewer with line selection, sharing capabilities, and branch-aware file loading
-- ✅ Improved TypeScript types and interfaces (added GitHubBranch type)
+- ✅ Updated RecentFiles system with branch tracking and display
+- ✅ Improved repository card layout with flexbox and proper footer alignment
+- ✅ Added relative time formatting for repository cards and branch lists
+- ✅ Enhanced GitHub API with `pushed_at` field and proper repository sorting
+- ✅ Improved TypeScript types and interfaces (added GitHubBranch type, updated RecentFile interface)
 - ✅ Better separation of concerns and maintainability
 - ✅ Branch-specific API integration in GitHubAPI class
 
@@ -40,6 +47,7 @@
 - [x] Keyboard navigation (arrow keys, enter, escape)
 - [x] Auto-populate search bar when clicking repository cards
 - [x] Search history and recent files (Recently Browsed Files section)
+- [x] Branch-aware recent files (separate entries for same file on different branches)
 - [x] Fuzzy search improvements (integrated Fuse.js)
 - [x] Auto-scroll on keyboard navigation
 - [x] Folder browsing and navigation within repositories
@@ -69,6 +77,8 @@
 - [x] Custom branding (HyperGit logo with GitHub + lightning bolt)
 - [x] Professional language icons (using Simple Icons)
 - [x] Section headers for Recent Repositories and Recent Files
+- [x] Repository card layout improvements (flexbox, footer alignment, date pastilles)
+- [x] Relative time display ("2h ago", "3d ago") for repositories and branches
 - [x] Footer with credits and links
 - [ ] Keyboard shortcuts help modal
 - [ ] Better empty states and onboarding
@@ -82,7 +92,9 @@
 - [x] GitHub Trees API for efficient file tree loading
 - [x] Debounced search optimization (reduced to 100ms)
 - [x] Recently browsed files cache (localStorage with timestamps)
+- [x] Branch-aware recent files caching with proper cleanup
 - [x] Pagination for repository listing (fetches all pages)
+- [x] Repository sorting fixes (using pushed_at for accurate activity ordering)
 - [ ] Lazy loading for large file lists
 - [ ] Virtual scrolling for long search results
 - [ ] Background repository syncing
@@ -94,6 +106,7 @@
 - [ ] Organization repository access
 - [x] Branch/tag switching (syntax: @repo-name:branch-name/file-path)
 - [x] Branch autocomplete when typing : after repository name
+- [x] Branch sorting by commit activity with relative time display
 - [ ] File editing capabilities (if write permissions)
 - [ ] Bulk file operations
 - [ ] Export search results
@@ -124,6 +137,8 @@
 - [x] Fixed dropdown not reopening properly after search bar reset
 - [x] Fixed dropdown visibility bug when typing @ after non-@ text
 - [x] Fixed component complexity issues through refactoring
+- [x] Fixed repository sorting showing incorrect dates (switched from updated_at to pushed_at)
+- [x] Fixed repository card layout issues with footer alignment
 - [ ] Handle rate limiting gracefully
 - [ ] Improve error messages for network failures
 - [ ] Handle very large files (>1MB)
