@@ -38,8 +38,10 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
       const computedHeight = Math.max(cardElement.offsetHeight, cardElement.scrollHeight, rect.height)
       
       const canvas = await html2canvas(cardElement, {
-        background: '#0f0f0f',
+        backgroundColor: '#0f0f0f',
         height: computedHeight + 30, // Extra space for text descenders
+        useCORS: true,
+        allowTaint: true,
       })
 
       // Convert to blob and download
@@ -178,20 +180,15 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
             <div className="screenshot-card glass-effect rounded-xl border border-[var(--neon-purple)]/30 overflow-hidden">
               {/* Card Header */}
               <div className="px-6 py-4 border-b border-[var(--dark-border)] bg-gradient-to-r from-[var(--dark-bg-secondary)] to-[var(--dark-bg-tertiary)]">
-                <div className="flex items-start justify-between">
-                  <div className="text-left">
-                    <h3 className="font-semibold text-[var(--dark-text)] text-lg text-left">{snippet.title}</h3>
-                    <p className="text-sm text-[var(--dark-text-secondary)] mt-1 text-left">
-                      {snippet.repo.full_name}
-                      {snippet.branch && snippet.branch !== snippet.repo.default_branch && (
-                        <span className="text-[var(--neon-purple)] mx-1">:{snippet.branch}</span>
-                      )}
-                      /{snippet.file.path}
-                    </p>
-                  </div>
-                  <div className="text-sm text-[var(--neon-purple)] bg-[var(--neon-purple)]/20 px-3 py-1 rounded-full border border-[var(--neon-purple)]/30">
-                    {lineRange}
-                  </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-[var(--dark-text)] text-lg text-left">{snippet.title}</h3>
+                  <p className="text-sm text-[var(--dark-text-secondary)] mt-1 text-left">
+                    {snippet.repo.full_name}
+                    {snippet.branch && snippet.branch !== snippet.repo.default_branch && (
+                      <span className="text-[var(--neon-purple)] mx-1">:{snippet.branch}</span>
+                    )}
+                    /{snippet.file.path} {lineRange}
+                  </p>
                 </div>
               </div>
 
