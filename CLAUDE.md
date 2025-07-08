@@ -75,3 +75,9 @@ The [TODO.md](./TODO.md) file must be kept up to date as the single source of tr
 - Discover new requirements or edge cases
 - Find bugs that need tracking
 - Change priorities based on user feedback
+
+### Build and Development Reminders
+- Always run `npm run build` after modifications to:
+  - Catch and fix potential build errors
+  - Ensure production-ready code
+  - Verify all changes compile correctly

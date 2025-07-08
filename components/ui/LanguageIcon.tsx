@@ -4,7 +4,7 @@ import { Code, File } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
 
 interface LanguageIconProps {
-  language: string | null
+  language?: string | null
   filename?: string
   size?: 'sm' | 'md' | 'lg'
   className?: string
