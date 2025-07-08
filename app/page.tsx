@@ -13,6 +13,7 @@ import LoadingScreen from '@/components/LoadingScreen'
 import { LogOut, GitBranch, Clock, File } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
 import { TimePill } from '@/components/ui/TimePill'
+import { ShineCard } from '@/components/ui/ShineCard'
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile; branch?: string } | null>(null)
@@ -224,9 +225,9 @@ export default function Home() {
                 ) : repositories.length > 0 ? (
                   // Actual repository cards
                   repositories.slice(0, 6).map((repo) => (
-                    <div
+                    <ShineCard
                       key={repo.full_name}
-                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer flex flex-col h-full active:scale-95"
+                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover flex flex-col h-full active:scale-95"
                       onClick={() => {
                         if (window.searchBarRef?.selectRepositoryFromCard) {
                           window.searchBarRef.selectRepositoryFromCard(repo)
@@ -244,7 +245,7 @@ export default function Home() {
                         </div>
                         <TimePill timestamp={repo.pushed_at || repo.updated_at} />
                       </div>
-                    </div>
+                    </ShineCard>
                   ))
                 ) : null}
                 </div>

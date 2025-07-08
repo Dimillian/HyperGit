@@ -6,6 +6,7 @@ import { RecentFile, RecentFilesManager } from '@/lib/recentFiles'
 import { Clock, X } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
 import { TimePill } from './ui/TimePill'
+import { ShineCard } from './ui/ShineCard'
 
 interface RecentFilesProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
@@ -130,9 +131,9 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
           const languageIcon = getLanguageIcon(file.name)
           
           return (
-            <div
+            <ShineCard
               key={`${repo.full_name}-${file.path}-${branch}-${timestamp}`}
-              className="glass-effect p-4 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer group relative"
+              className="glass-effect p-4 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover group relative"
               onClick={() => onFileSelect(repo, file, branch)}
             >
               {/* Remove button */}
@@ -160,7 +161,7 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
                   <TimePill timestamp={timestamp} />
                 </div>
               </div>
-            </div>
+            </ShineCard>
           )
         })}
       </div>

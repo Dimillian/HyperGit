@@ -9,6 +9,7 @@ import { Code, X, Copy, ExternalLink, CheckCircle, Eye } from 'lucide-react'
 import SnippetViewer from './SnippetViewer'
 import * as SimpleIcons from 'simple-icons'
 import { TimePill } from './ui/TimePill'
+import { ShineCard } from './ui/ShineCard'
 
 interface RecentSnippetsProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
@@ -149,9 +150,9 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
             : `L${snippet.selectedLines.start}-${snippet.selectedLines.end}`
           
           return (
-            <div
+            <ShineCard
               key={snippet.id}
-              className="glass-effect p-4 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer group relative flex flex-col h-full active:scale-95"
+              className="glass-effect p-4 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover group relative flex flex-col h-full active:scale-95"
               onClick={() => setSelectedSnippet(snippet)}
             >
               {/* Header with actions */}
@@ -244,7 +245,7 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                 </div>
                 <TimePill timestamp={snippet.timestamp} />
               </div>
-            </div>
+            </ShineCard>
           )
         })}
       </div>
