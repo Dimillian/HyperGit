@@ -203,6 +203,10 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
                   showLineNumbers
                   startingLineNumber={snippet.selectedLines.start}
                   wrapLines
+                  customStyle={{
+                    margin: 0,
+                    borderRadius: '0',
+                  }}
                 >
                   {snippet.code}
                 </SyntaxHighlighter>
