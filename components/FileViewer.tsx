@@ -91,40 +91,106 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
       return
     }
 
-    // Find the start and end line numbers
-    const range = selection.getRangeAt(0)
-    const codeElement = codeRef.current.querySelector('code')
-    
-    if (!codeElement) return
-
-    // Get all line elements
-    const lineElements = codeElement.querySelectorAll('.linenumber')
-    if (lineElements.length === 0) return
-
-    // Find which lines are selected
-    let startLine = 1
-    let endLine = 1
-
     try {
-      // Get the text content and find line positions
-      const fullText = codeElement.textContent || ''
-      const selectedText = selection.toString()
+      const range = selection.getRangeAt(0)
+      const codeElement = codeRef.current.querySelector('pre code')
       
-      if (!selectedText.trim()) {
-        setSelectedLines(null)
+      if (!codeElement) return
+
+      // Get all line number spans
+      const lineNumberSpans = Array.from(codeElement.querySelectorAll('span[data-line-number]'))
+      
+      if (lineNumberSpans.length === 0) {
+        // Fallback: find spans that contain line numbers
+        const allSpans = Array.from(codeElement.querySelectorAll('span'))
+        const lineSpans = allSpans.filter(span => {
+          const text = span.textContent?.trim() || ''
+          return /^\d+$/.test(text) && parseInt(text) > 0
+        })
+        
+        if (lineSpans.length === 0) {
+          setSelectedLines(null)
+          return
+        }
+        
+        // Find the first and last line within the selection
+        let startLine = null
+        let endLine = null
+        
+        for (const span of lineSpans) {
+          const lineNum = parseInt(span.textContent || '0')
+          if (lineNum === 0) continue
+          
+          // Check if this line span is within the selection
+          if (selection.containsNode(span, true)) {
+            if (startLine === null || lineNum < startLine) startLine = lineNum
+            if (endLine === null || lineNum > endLine) endLine = lineNum
+          }
+        }
+        
+        if (startLine && endLine) {
+          setSelectedLines({ start: startLine, end: endLine })
+        } else {
+          setSelectedLines(null)
+        }
         return
       }
 
-      const beforeSelection = fullText.substring(0, fullText.indexOf(selectedText))
-      const linesBeforeSelection = beforeSelection.split('\n').length
-      const selectedTextLines = selectedText.split('\n').length
+      // Modern approach with data attributes
+      let startLine = null
+      let endLine = null
 
-      startLine = linesBeforeSelection
-      endLine = linesBeforeSelection + selectedTextLines - 1
+      for (const span of lineNumberSpans) {
+        if (selection.containsNode(span.parentElement || span, true)) {
+          const lineNum = parseInt(span.getAttribute('data-line-number') || '0')
+          if (lineNum > 0) {
+            if (startLine === null || lineNum < startLine) startLine = lineNum
+            if (endLine === null || lineNum > endLine) endLine = lineNum
+          }
+        }
+      }
 
-      // Ensure we have valid line numbers
-      if (startLine > 0 && endLine > 0 && endLine >= startLine) {
+      if (startLine && endLine) {
         setSelectedLines({ start: startLine, end: endLine })
+      } else {
+        // Try alternative method: analyze the selection range
+        const startContainer = range.startContainer
+        const endContainer = range.endContainer
+        
+        // Find the closest line number for start and end
+        const findLineNumber = (node: Node): number | null => {
+          let current: Node | null = node
+          while (current) {
+            if (current.nodeType === Node.ELEMENT_NODE) {
+              const element = current as Element
+              // Check if this element or its children contain a line number
+              const lineNumSpan = element.querySelector?.('span[data-line-number]') || 
+                                 Array.from(element.querySelectorAll?.('span') || [])
+                                   .find(s => /^\d+$/.test(s.textContent?.trim() || ''))
+              
+              if (lineNumSpan) {
+                const num = lineNumSpan.getAttribute?.('data-line-number') || lineNumSpan.textContent?.trim()
+                if (num && /^\d+$/.test(num)) {
+                  return parseInt(num)
+                }
+              }
+            }
+            current = current.parentNode
+          }
+          return null
+        }
+        
+        const startLineNum = findLineNumber(startContainer)
+        const endLineNum = findLineNumber(endContainer)
+        
+        if (startLineNum && endLineNum) {
+          setSelectedLines({ 
+            start: Math.min(startLineNum, endLineNum), 
+            end: Math.max(startLineNum, endLineNum) 
+          })
+        } else {
+          setSelectedLines(null)
+        }
       }
     } catch (error) {
       console.error('Error calculating line selection:', error)
