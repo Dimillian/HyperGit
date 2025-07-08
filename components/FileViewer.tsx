@@ -184,34 +184,53 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
     >
       <div className="glass-effect rounded-2xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-[var(--neon-purple)]/30 neon-glow">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[var(--dark-border)]">
-          <div className="flex items-center gap-3">
-            <File className="w-6 h-6 text-[var(--neon-purple)]" />
-            <div>
-              <h2 className="font-semibold text-xl text-[var(--dark-text)]">{file.name}</h2>
-              <p className="text-sm text-[var(--dark-text-secondary)]">
-                {repo.full_name}
-                {branch && branch !== repo.default_branch && (
-                  <span className="text-[var(--neon-purple)] mx-1">:{branch}</span>
-                )}
-                /{file.path}
-              </p>
+        <div className="p-6 border-b border-[var(--dark-border)]">
+          {/* File info row with close button */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <File className="w-6 h-6 text-[var(--neon-purple)]" />
+              <div className="text-left">
+                <h2 className="font-semibold text-xl text-[var(--dark-text)] text-left">{file.name}</h2>
+                <p className="text-sm text-[var(--dark-text-secondary)] mt-1 text-left">
+                  {repo.full_name}
+                  {branch && branch !== repo.default_branch && (
+                    <span className="text-[var(--neon-purple)] mx-1">:{branch}</span>
+                  )}
+                  /{file.path}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              {selectedLines && (
+                <div className="text-sm text-[var(--neon-purple)] bg-[var(--neon-purple)]/20 px-3 py-1 rounded-full border border-[var(--neon-purple)]/30">
+                  Lines {selectedLines.start}-{selectedLines.end} selected
+                  <button
+                    onClick={clearSelection}
+                    className="text-xs hover:text-[var(--neon-purple-bright)] ml-2"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+              
+              <button
+                onClick={() => {
+                  onClose()
+                  // Reset search bar when closing via close button
+                  if (window.searchBarRef?.resetSearchBar) {
+                    window.searchBarRef.resetSearchBar()
+                  }
+                }}
+                className="px-3 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
+              >
+                ×
+              </button>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            {selectedLines && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-purple)]/20 text-[var(--neon-purple)] text-sm rounded-lg border border-[var(--neon-purple)]/30">
-                Lines {selectedLines.start}-{selectedLines.end} selected
-                <button
-                  onClick={clearSelection}
-                  className="text-xs hover:text-[var(--neon-purple-bright)] ml-1"
-                >
-                  ×
-                </button>
-              </div>
-            )}
 
+          {/* Action buttons row */}
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={copyToClipboard}
               className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
@@ -267,19 +286,6 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
               <ExternalLink className="w-4 h-4" />
               GitHub
             </a>
-            
-            <button
-              onClick={() => {
-                onClose()
-                // Reset search bar when closing via close button
-                if (window.searchBarRef?.resetSearchBar) {
-                  window.searchBarRef.resetSearchBar()
-                }
-              }}
-              className="ml-2 px-3 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
-            >
-              ×
-            </button>
           </div>
         </div>
 
