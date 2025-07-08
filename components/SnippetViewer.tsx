@@ -38,8 +38,7 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
       const computedHeight = Math.max(cardElement.offsetHeight, cardElement.scrollHeight, rect.height)
       
       const canvas = await html2canvas(cardElement, {
-        backgroundColor: '#0f0f0f',
-        height: computedHeight + 30, // Extra space for text descenders
+        height: computedHeight + 20, // Extra space for text descenders
         useCORS: true,
         allowTaint: true,
       })
