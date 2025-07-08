@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
 import { RecentSnippet, RecentSnippetsManager } from '@/lib/recentSnippets'
 import { Code, Clock, X, Copy, ExternalLink, CheckCircle, Eye } from 'lucide-react'
@@ -225,9 +227,23 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
 
               {/* Code preview */}
               <div className="flex-1 mb-3">
-                <pre className="text-xs text-[var(--dark-text)] bg-[var(--dark-bg-tertiary)] p-2 rounded border border-[var(--dark-border)] overflow-hidden">
-                  <code>{getCodePreview(snippet.code)}</code>
-                </pre>
+                <div className="rounded border border-[var(--dark-border)] overflow-hidden">
+                  <SyntaxHighlighter
+                    language={snippet.language}
+                    style={oneDark}
+                    showLineNumbers
+                    startingLineNumber={snippet.selectedLines.start}
+                    wrapLines={false}
+                    customStyle={{
+                      margin: 0,
+                      padding: '0.75rem',
+                      fontSize: '0.75rem',
+                      lineHeight: '1.2',
+                    }}
+                  >
+                    {getCodePreview(snippet.code, 4)}
+                  </SyntaxHighlighter>
+                </div>
               </div>
 
               {/* Footer */}
