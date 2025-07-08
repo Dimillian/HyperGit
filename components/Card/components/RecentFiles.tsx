@@ -4,11 +4,7 @@ import { useState, useEffect } from 'react'
 import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
 import { RecentFile, RecentFilesManager } from '@/lib/recentFiles'
 import { Clock, X } from 'lucide-react'
-import { TimePill } from './ui/TimePill'
-import { ShineCard } from './ui/ShineCard'
-import { LanguageIcon } from './ui/LanguageIcon'
-import { CardActions } from './ui/CardActions'
-import { FilePathDisplay } from './ui/FilePathDisplay'
+import { TimePill, ShineCard, LanguageIcon, CardActions, FilePathDisplay } from '../ui'
 
 interface RecentFilesProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void

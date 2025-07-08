@@ -7,13 +7,10 @@ import { RecentFilesManager } from '@/lib/recentFiles'
 import SearchBar from '@/components/SearchBar'
 import FileViewer from '@/components/FileViewer'
 import AuthPrompt from '@/components/AuthPrompt'
-import RecentFiles from '@/components/RecentFiles'
-import RecentSnippets from '@/components/RecentSnippets'
+import { RecentFiles, RecentSnippets } from '@/components/Card'
 import LoadingScreen from '@/components/LoadingScreen'
 import { LogOut, GitBranch, Clock, File } from 'lucide-react'
-import { TimePill } from '@/components/ui/TimePill'
-import { ShineCard } from '@/components/ui/ShineCard'
-import { LanguageIcon } from '@/components/ui/LanguageIcon'
+import { TimePill, ShineCard, LanguageIcon } from '@/components/Card'
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile; branch?: string } | null>(null)

@@ -6,12 +6,8 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { GitHubRepo, GitHubFile } from '@/lib/github/api'
 import { RecentSnippet, RecentSnippetsManager } from '@/lib/recentSnippets'
 import { Code, X, Copy, ExternalLink, CheckCircle, Eye } from 'lucide-react'
-import SnippetViewer from './SnippetViewer'
-import { TimePill } from './ui/TimePill'
-import { ShineCard } from './ui/ShineCard'
-import { LanguageIcon } from './ui/LanguageIcon'
-import { CardActions } from './ui/CardActions'
-import { FilePathDisplay } from './ui/FilePathDisplay'
+import SnippetViewer from '../../SnippetViewer'
+import { TimePill, ShineCard, LanguageIcon, CardActions, FilePathDisplay } from '../ui'
 
 interface RecentSnippetsProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
@@ -151,7 +147,6 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                 <CardActions 
                   actions={actions}
                   className="sm:absolute sm:top-0 sm:right-0 mt-2 sm:mt-0"
-                  alwaysVisible={true}
                 />
               </div>
 
