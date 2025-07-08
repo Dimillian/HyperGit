@@ -5,17 +5,19 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
 import { useGitHub } from '@/hooks/useGitHub'
-import { File, ExternalLink, Copy, CheckCircle, Camera } from 'lucide-react'
+import { File, ExternalLink, Copy, CheckCircle, Camera, BookmarkPlus } from 'lucide-react'
 import CodeSnippetShare from './CodeSnippetShare'
+import { RecentSnippetsManager } from '@/lib/recentSnippets'
 
 interface FileViewerProps {
   repo: GitHubRepo
   file: GitHubFile
   branch?: string
   onClose: () => void
+  onSnippetSaved?: () => void
 }
 
-export default function FileViewer({ repo, file, branch, onClose }: FileViewerProps) {
+export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved }: FileViewerProps) {
   const [content, setContent] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,6 +25,7 @@ export default function FileViewer({ repo, file, branch, onClose }: FileViewerPr
   const [selectedLines, setSelectedLines] = useState<{ start: number; end: number } | null>(null)
   const [isSelecting, setIsSelecting] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
+  const [snippetSaved, setSnippetSaved] = useState(false)
   const codeRef = useRef<HTMLDivElement>(null)
   const { github } = useGitHub()
 
@@ -140,6 +143,30 @@ export default function FileViewer({ repo, file, branch, onClose }: FileViewerPr
     }
   }
 
+  const saveSnippet = () => {
+    if (!selectedLines) return
+    
+    const selectedCode = getSelectedCode()
+    const currentBranch = branch || repo.default_branch
+    
+    RecentSnippetsManager.addRecentSnippet(
+      repo,
+      file,
+      currentBranch,
+      selectedLines,
+      selectedCode,
+      language
+    )
+    
+    setSnippetSaved(true)
+    setTimeout(() => setSnippetSaved(false), 2000)
+    
+    // Notify parent component to refresh recent snippets
+    if (onSnippetSaved) {
+      onSnippetSaved()
+    }
+  }
+
   const language = getFileLanguage(file.name)
 
   return (
@@ -203,13 +230,32 @@ export default function FileViewer({ repo, file, branch, onClose }: FileViewerPr
             </button>
 
             {selectedLines && (
-              <button
-                onClick={handleShareClick}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] text-white hover:from-[var(--neon-purple-bright)] hover:to-[var(--neon-purple)] rounded-lg transition-all duration-200 neon-glow-hover"
-              >
-                <Camera className="w-4 h-4" />
-                Share Snippet
-              </button>
+              <>
+                <button
+                  onClick={saveSnippet}
+                  className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
+                >
+                  {snippetSaved ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      Saved!
+                    </>
+                  ) : (
+                    <>
+                      <BookmarkPlus className="w-4 h-4" />
+                      Save Snippet
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleShareClick}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] text-white hover:from-[var(--neon-purple-bright)] hover:to-[var(--neon-purple)] rounded-lg transition-all duration-200 neon-glow-hover"
+                >
+                  <Camera className="w-4 h-4" />
+                  Share Snippet
+                </button>
+              </>
             )}
             
             <a
@@ -255,7 +301,7 @@ export default function FileViewer({ repo, file, branch, onClose }: FileViewerPr
               {!selectedLines && (
                 <div className="px-6 py-3 bg-[var(--neon-purple)]/10 border-b border-[var(--neon-purple)]/20">
                   <p className="text-sm text-[var(--neon-purple)]">
-                    💡 Tip: Select lines of code to share as a beautiful screenshot!
+                    💡 Tip: Select lines of code to save as snippet or share as a beautiful screenshot!
                   </p>
                 </div>
               )}

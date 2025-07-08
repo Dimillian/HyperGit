@@ -8,6 +8,7 @@ import SearchBar from '@/components/SearchBar'
 import FileViewer from '@/components/FileViewer'
 import AuthPrompt from '@/components/AuthPrompt'
 import RecentFiles from '@/components/RecentFiles'
+import RecentSnippets from '@/components/RecentSnippets'
 import LoadingScreen from '@/components/LoadingScreen'
 import { LogOut, GitBranch, Clock, File } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
@@ -15,6 +16,7 @@ import * as SimpleIcons from 'simple-icons'
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile; branch?: string } | null>(null)
   const [recentFilesKey, setRecentFilesKey] = useState(0)
+  const [recentSnippetsKey, setRecentSnippetsKey] = useState(0)
   const { isAuthenticated, repositories, clearToken, loading, isInitializing } = useGitHub()
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile, branch?: string) => {
@@ -25,6 +27,11 @@ export default function Home() {
     setRecentFilesKey(prev => prev + 1)
     
     setSelectedFile({ repo, file, branch })
+  }
+
+  // Handle snippet save to refresh recent snippets
+  const handleSnippetSaved = () => {
+    setRecentSnippetsKey(prev => prev + 1)
   }
 
   const handleRepoSelect = (repo: GitHubRepo) => {
@@ -250,8 +257,8 @@ export default function Home() {
                         }
                       }}
                     >
-                      <h3 className="font-medium text-[var(--dark-text)] truncate">{repo.name}</h3>
-                      <p className="text-sm text-[var(--dark-text-secondary)] mt-1 line-clamp-2 flex-1">
+                      <h3 className="font-medium text-[var(--dark-text)] truncate text-left">{repo.name}</h3>
+                      <p className="text-sm text-[var(--dark-text-secondary)] mt-1 line-clamp-2 flex-1 text-left">
                         {repo.description || 'No description'}
                       </p>
                       <div className="flex items-center justify-between mt-3">
@@ -273,6 +280,13 @@ export default function Home() {
               {isAuthenticated && (
                 <div className="max-w-4xl mx-auto">
                   <RecentFiles key={recentFilesKey} onFileSelect={handleFileSelect} />
+                </div>
+              )}
+
+              {/* Recent Snippets Section */}
+              {isAuthenticated && (
+                <div className="max-w-4xl mx-auto">
+                  <RecentSnippets key={recentSnippetsKey} onFileSelect={handleFileSelect} />
                 </div>
               )}
             </div>
@@ -328,6 +342,7 @@ export default function Home() {
           file={selectedFile.file}
           branch={selectedFile.branch}
           onClose={() => setSelectedFile(null)}
+          onSnippetSaved={handleSnippetSaved}
         />
       )}
     </div>
