@@ -31,6 +31,32 @@ export default function Home() {
     // This will be handled by the SearchBar component
   }
 
+  // Helper function to format relative time
+  const formatRelativeTime = (dateString: string): string => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffMinutes = Math.floor(diffMs / (1000 * 60))
+
+    // Calculate if it's been more than a month
+    const oneMonthAgo = new Date()
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
+    
+    if (date < oneMonthAgo) {
+      return date.toLocaleDateString()
+    } else if (diffDays > 0) {
+      return `${diffDays}d ago`
+    } else if (diffHours > 0) {
+      return `${diffHours}h ago`
+    } else if (diffMinutes > 0) {
+      return `${diffMinutes}m ago`
+    } else {
+      return 'just now'
+    }
+  }
+
   // Get language icon for repository
   const getRepoLanguageIcon = (language: string | null) => {
     if (!language) {
@@ -217,7 +243,7 @@ export default function Home() {
                   repositories.slice(0, 6).map((repo) => (
                     <div
                       key={repo.full_name}
-                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer"
+                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer flex flex-col h-full"
                       onClick={() => {
                         if (window.searchBarRef?.selectRepositoryFromCard) {
                           window.searchBarRef.selectRepositoryFromCard(repo)
@@ -225,7 +251,7 @@ export default function Home() {
                       }}
                     >
                       <h3 className="font-medium text-[var(--dark-text)] truncate">{repo.name}</h3>
-                      <p className="text-sm text-[var(--dark-text-secondary)] mt-1 line-clamp-2">
+                      <p className="text-sm text-[var(--dark-text-secondary)] mt-1 line-clamp-2 flex-1">
                         {repo.description || 'No description'}
                       </p>
                       <div className="flex items-center justify-between mt-3">
@@ -233,8 +259,8 @@ export default function Home() {
                           {getRepoLanguageIcon(repo.language)}
                           <span className="text-xs text-[var(--neon-purple)]">{repo.language || 'Unknown'}</span>
                         </div>
-                        <span className="text-xs text-[var(--dark-text-secondary)]">
-                          {new Date(repo.pushed_at || repo.updated_at).toLocaleDateString()}
+                        <span className="text-xs text-[var(--dark-text-secondary)] bg-[var(--dark-bg-tertiary)] px-2 py-0.5 rounded">
+                          {formatRelativeTime(repo.pushed_at || repo.updated_at)}
                         </span>
                       </div>
                     </div>
