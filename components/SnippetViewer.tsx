@@ -104,25 +104,25 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
         }
       }}
     >
-      <div className="glass-effect rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-[var(--neon-purple)]/30 neon-glow">
+      <div className="glass-effect rounded-2xl max-w-4xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col border border-[var(--neon-purple)]/30 neon-glow">
         {/* Header */}
         <div className="p-6 border-b border-[var(--dark-border)]">
           {/* Action buttons row with close button */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 flex-1">
               <button
                 onClick={copyToClipboard}
-                className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
+                className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
               >
                 {copied ? (
                   <>
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Copied!
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span className="sm:inline">Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4" />
-                    Copy
+                    <Copy className="w-5 h-5" />
+                    <span className="sm:inline">Copy</span>
                   </>
                 )}
               </button>
@@ -130,43 +130,43 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
               <button
                 onClick={generateScreenshot}
                 disabled={isGenerating}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] text-white hover:from-[var(--neon-purple-bright)] hover:to-[var(--neon-purple)] rounded-lg transition-all duration-200 neon-glow-hover disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] text-white hover:from-[var(--neon-purple-bright)] hover:to-[var(--neon-purple)] rounded-lg transition-all duration-200 neon-glow-hover disabled:opacity-50"
               >
                 {isGenerating ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Generating...
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span className="sm:inline">Generating...</span>
                   </>
                 ) : (
                   <>
-                    <Camera className="w-4 h-4" />
-                    Screenshot
+                    <Camera className="w-5 h-5" />
+                    <span className="sm:inline">Screenshot</span>
                   </>
                 )}
               </button>
 
               <button
                 onClick={shareSnippet}
-                className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
+                className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
               >
-                <Share2 className="w-4 h-4" />
-                Share
+                <Share2 className="w-5 h-5" />
+                <span className="sm:inline">Share</span>
               </button>
               
               <a
                 href={`https://github.com/${snippet.repo.full_name}/blob/${snippet.branch}/${snippet.file.path}#L${snippet.selectedLines.start}-L${snippet.selectedLines.end}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-[var(--neon-purple)] text-white hover:bg-[var(--neon-purple-bright)] rounded-lg transition-all duration-200 neon-glow-hover"
+                className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm bg-[var(--neon-purple)] text-white hover:bg-[var(--neon-purple-bright)] rounded-lg transition-all duration-200 neon-glow-hover"
               >
-                <ExternalLink className="w-4 h-4" />
-                GitHub
+                <ExternalLink className="w-5 h-5" />
+                <span className="sm:inline">GitHub</span>
               </a>
             </div>
 
             <button
               onClick={onClose}
-              className="px-3 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
             >
               ×
             </button>

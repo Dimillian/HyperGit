@@ -364,7 +364,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
       {isDropdownOpen && isAuthenticated && (
         <div
           ref={dropdownRef}
-          className="absolute top-full mt-3 w-full glass-effect border border-[var(--neon-purple)]/30 rounded-2xl max-h-80 overflow-y-auto z-50 backdrop-blur-xl"
+          className="absolute top-full mt-3 w-full glass-effect border border-[var(--neon-purple)]/30 rounded-2xl max-h-96 sm:max-h-80 overflow-y-auto z-50 backdrop-blur-xl"
         >
           {mode === 'branches' || (mode === 'repos' && shouldShowBranches) ? (
             selectedRepo ? (

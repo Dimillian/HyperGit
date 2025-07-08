@@ -182,7 +182,7 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
         }
       }}
     >
-      <div className="glass-effect rounded-2xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-[var(--neon-purple)]/30 neon-glow">
+      <div className="glass-effect rounded-2xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col border border-[var(--neon-purple)]/30 neon-glow">
         {/* Header */}
         <div className="p-6 border-b border-[var(--dark-border)]">
           {/* File info row with close button */}
@@ -201,13 +201,13 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
               </div>
             </div>
             
-            <div className="flex items-start gap-3">
+            <div className="flex items-center gap-3">
               {selectedLines && (
-                <div className="text-sm text-[var(--neon-purple)] bg-[var(--neon-purple)]/20 px-3 py-1 rounded-full border border-[var(--neon-purple)]/30">
-                  Lines {selectedLines.start}-{selectedLines.end} selected
+                <div className="flex items-center text-sm text-[var(--neon-purple)] bg-[var(--neon-purple)]/20 px-3 py-1 rounded-full border border-[var(--neon-purple)]/30">
+                  <span>Lines {selectedLines.start}-{selectedLines.end} selected</span>
                   <button
                     onClick={clearSelection}
-                    className="text-xs hover:text-[var(--neon-purple-bright)] ml-2"
+                    className="text-sm hover:text-[var(--neon-purple-bright)] ml-2 w-4 h-4 flex items-center justify-center rounded"
                   >
                     ×
                   </button>
@@ -222,7 +222,7 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
                     window.searchBarRef.resetSearchBar()
                   }
                 }}
-                className="px-3 py-2 text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
               >
                 ×
               </button>
@@ -230,61 +230,63 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
           </div>
 
           {/* Action buttons row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={copyToClipboard}
-              className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
-            >
-              {copied ? (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 flex-1">
+              <button
+                onClick={copyToClipboard}
+                className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
+              >
+                {copied ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span className="sm:inline">{selectedLines ? 'Selection Copied!' : 'Copied!'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-5 h-5" />
+                    <span className="sm:inline">{selectedLines ? 'Copy Selection' : 'Copy'}</span>
+                  </>
+                )}
+              </button>
+
+              {selectedLines && (
                 <>
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  {selectedLines ? 'Selection Copied!' : 'Copied!'}
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  {selectedLines ? 'Copy Selection' : 'Copy'}
+                  <button
+                    onClick={saveSnippet}
+                    className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
+                  >
+                    {snippetSaved ? (
+                      <>
+                        <CheckCircle className="w-5 h-5 text-green-400" />
+                        <span className="sm:inline">Saved!</span>
+                      </>
+                    ) : (
+                      <>
+                        <BookmarkPlus className="w-5 h-5" />
+                        <span className="sm:inline">Save Snippet</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleShareClick}
+                    className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] text-white hover:from-[var(--neon-purple-bright)] hover:to-[var(--neon-purple)] rounded-lg transition-all duration-200 neon-glow-hover"
+                  >
+                    <Camera className="w-5 h-5" />
+                    <span className="sm:inline">Share Snippet</span>
+                  </button>
                 </>
               )}
-            </button>
-
-            {selectedLines && (
-              <>
-                <button
-                  onClick={saveSnippet}
-                  className="flex items-center gap-2 px-4 py-2 text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50"
-                >
-                  {snippetSaved ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                      Saved!
-                    </>
-                  ) : (
-                    <>
-                      <BookmarkPlus className="w-4 h-4" />
-                      Save Snippet
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={handleShareClick}
-                  className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] text-white hover:from-[var(--neon-purple-bright)] hover:to-[var(--neon-purple)] rounded-lg transition-all duration-200 neon-glow-hover"
-                >
-                  <Camera className="w-4 h-4" />
-                  Share Snippet
-                </button>
-              </>
-            )}
+            </div>
             
             <a
               href={`https://github.com/${repo.full_name}/blob/${branch || repo.default_branch}/${file.path}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-[var(--neon-purple)] text-white hover:bg-[var(--neon-purple-bright)] rounded-lg transition-all duration-200 neon-glow-hover"
+              className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm bg-[var(--neon-purple)] text-white hover:bg-[var(--neon-purple-bright)] rounded-lg transition-all duration-200 neon-glow-hover"
             >
-              <ExternalLink className="w-4 h-4" />
-              GitHub
+              <ExternalLink className="w-5 h-5" />
+              <span className="sm:inline">GitHub</span>
             </a>
           </div>
         </div>

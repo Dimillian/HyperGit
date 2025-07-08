@@ -61,7 +61,7 @@ export const FileDropdown = ({
               setQuery(beforeAt)
               setCurrentPath('')
             }}
-            className="text-[var(--neon-purple)] hover:text-[var(--neon-purple-bright)] text-sm transition-colors duration-200 px-2 py-1 rounded hover:bg-[var(--neon-purple)]/10"
+            className="text-[var(--neon-purple)] hover:text-[var(--neon-purple-bright)] text-sm transition-colors duration-200 px-3 py-2 sm:px-2 sm:py-1 min-h-[44px] sm:min-h-0 flex items-center justify-center rounded hover:bg-[var(--neon-purple)]/10"
           >
             ← Back
           </button>
@@ -70,7 +70,7 @@ export const FileDropdown = ({
           <div className="flex items-center gap-1 text-xs text-[var(--dark-text-secondary)]">
             <button
               onClick={() => setCurrentPath('')}
-              className="hover:text-[var(--neon-purple)] transition-colors"
+              className="hover:text-[var(--neon-purple)] transition-colors p-1 min-w-[32px] min-h-[32px] sm:p-0 sm:min-w-0 sm:min-h-0 flex items-center justify-center rounded"
             >
               root
             </button>
@@ -78,10 +78,10 @@ export const FileDropdown = ({
               const path = arr.slice(0, index + 1).join('/')
               return (
                 <span key={path} className="flex items-center">
-                  <ChevronRight className="w-3 h-3 mx-1" />
+                  <ChevronRight className="w-4 h-4 sm:w-3 sm:h-3 mx-1" />
                   <button
                     onClick={() => setCurrentPath(path)}
-                    className="hover:text-[var(--neon-purple)] transition-colors"
+                    className="hover:text-[var(--neon-purple)] transition-colors p-1 min-w-[32px] min-h-[32px] sm:p-0 sm:min-w-0 sm:min-h-0 flex items-center justify-center rounded"
                   >
                     {segment}
                   </button>
@@ -116,10 +116,10 @@ export const FileDropdown = ({
           <div
             key={file.path}
             data-dropdown-item
-            className={`flex items-start gap-3 ${isRootFileView ? 'p-3' : 'p-4'} cursor-pointer transition-all duration-200 ${
+            className={`flex items-start gap-3 ${isRootFileView ? 'p-4 sm:p-3' : 'p-5 sm:p-4'} min-h-[56px] sm:min-h-0 cursor-pointer transition-all duration-200 ${
               index === selectedIndex 
                 ? 'bg-[var(--neon-purple)]/20 text-[var(--neon-purple-bright)] border-l-2 border-[var(--neon-purple)]' 
-                : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)]'
+                : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)] active:bg-[var(--dark-bg-secondary)]'
             }`}
             onClick={() => {
               if (file.type === 'dir') {
@@ -132,11 +132,11 @@ export const FileDropdown = ({
             }}
           >
             {file.type === 'dir' ? (
-              <Folder className={`w-4 h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
+              <Folder className={`w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
                 index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
               }`} />
             ) : (
-              <File className={`w-4 h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
+              <File className={`w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0 ${isRootFileView ? 'mt-0' : 'mt-0.5'} ${
                 index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
               }`} />
             )}

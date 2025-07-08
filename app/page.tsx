@@ -67,7 +67,7 @@ export default function Home() {
   // Get language icon for repository
   const getRepoLanguageIcon = (language: string | null) => {
     if (!language) {
-      return <File className="w-3 h-3" style={{ color: '#888' }} />
+      return <File className="w-4 h-4 sm:w-3 sm:h-3" style={{ color: '#888' }} />
     }
 
     const getIconPath = (iconName: string): string | null => {
@@ -111,17 +111,17 @@ export default function Home() {
 
     const iconInfo = iconMap[normalizedLang]
     if (!iconInfo) {
-      return <File className="w-3 h-3" style={{ color: '#888' }} />
+      return <File className="w-4 h-4 sm:w-3 sm:h-3" style={{ color: '#888' }} />
     }
 
     const iconPath = getIconPath(iconInfo.name)
     if (!iconPath) {
-      return <File className="w-3 h-3" style={{ color: '#888' }} />
+      return <File className="w-4 h-4 sm:w-3 sm:h-3" style={{ color: '#888' }} />
     }
 
     return (
       <svg
-        className="w-3 h-3"
+        className="w-4 h-4 sm:w-3 sm:h-3"
         viewBox="0 0 24 24"
         fill={iconInfo.color}
       >
@@ -250,7 +250,7 @@ export default function Home() {
                   repositories.slice(0, 6).map((repo) => (
                     <div
                       key={repo.full_name}
-                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer flex flex-col h-full"
+                      className="glass-effect p-5 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer flex flex-col h-full active:scale-95"
                       onClick={() => {
                         if (window.searchBarRef?.selectRepositoryFromCard) {
                           window.searchBarRef.selectRepositoryFromCard(repo)
@@ -262,7 +262,7 @@ export default function Home() {
                         {repo.description || 'No description'}
                       </p>
                       <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-2">
                           {getRepoLanguageIcon(repo.language)}
                           <span className="text-xs text-[var(--neon-purple)]">{repo.language || 'Unknown'}</span>
                         </div>

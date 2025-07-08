@@ -114,20 +114,20 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
     const iconInfo = iconMap[language.toLowerCase()]
     if (!iconInfo) {
       return (
-        <Code className="w-3 h-3" style={{ color: '#888' }} />
+        <Code className="w-4 h-4" style={{ color: '#888' }} />
       )
     }
 
     const iconPath = getIconPath(iconInfo.name)
     if (!iconPath) {
       return (
-        <Code className="w-3 h-3" style={{ color: '#888' }} />
+        <Code className="w-4 h-4" style={{ color: '#888' }} />
       )
     }
 
     return (
       <svg
-        className="w-3 h-3"
+        className="w-4 h-4"
         viewBox="0 0 24 24"
         fill={iconInfo.color}
       >
@@ -164,7 +164,7 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
           return (
             <div
               key={snippet.id}
-              className="glass-effect p-4 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer group relative flex flex-col h-full"
+              className="glass-effect p-4 rounded-xl border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 transition-all duration-200 neon-glow-hover cursor-pointer group relative flex flex-col h-full active:scale-95"
               onClick={() => setSelectedSnippet(snippet)}
             >
               {/* Header with actions */}
@@ -183,26 +183,26 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                 </div>
                 
                 {/* Action buttons */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       onFileSelect(snippet.repo, snippet.file, snippet.branch)
                     }}
-                    className="p-1 rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
+                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
                     title="View full file"
                   >
-                    <Eye className="w-3 h-3" />
+                    <Eye className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => copySnippet(snippet, e)}
-                    className="p-1 rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
+                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
                     title="Copy snippet"
                   >
                     {copiedSnippet === snippet.id ? (
-                      <CheckCircle className="w-3 h-3 text-green-400" />
+                      <CheckCircle className="w-4 h-4 text-green-400" />
                     ) : (
-                      <Copy className="w-3 h-3" />
+                      <Copy className="w-4 h-4" />
                     )}
                   </button>
                   <a
@@ -210,17 +210,17 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="p-1 rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
+                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
                     title="View on GitHub"
                   >
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-4 h-4" />
                   </a>
                   <button
                     onClick={(e) => removeRecentSnippet(snippet.id, e)}
-                    className="p-1 rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
+                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
                     title="Remove snippet"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -237,8 +237,8 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                     customStyle={{
                       margin: 0,
                       padding: '0.75rem',
-                      fontSize: '0.75rem',
-                      lineHeight: '1.2',
+                      fontSize: '0.875rem',
+                      lineHeight: '1.4',
                     }}
                   >
                     {getCodePreview(snippet.code, 4)}
@@ -248,8 +248,10 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
 
               {/* Footer */}
               <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1">
-                  {languageIcon}
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 flex items-center justify-center">
+                    {languageIcon}
+                  </div>
                   <span className="text-[var(--neon-purple)]">{snippet.language}</span>
                 </div>
                 <span className="text-[var(--dark-text-secondary)]">

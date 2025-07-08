@@ -66,14 +66,14 @@ export const BranchDropdown = ({
           <div
             key={branch.name}
             data-dropdown-item
-            className={`flex items-center gap-3 p-4 cursor-pointer transition-all duration-200 ${
+            className={`flex items-center gap-3 p-5 sm:p-4 min-h-[56px] sm:min-h-0 cursor-pointer transition-all duration-200 ${
               index === selectedIndex 
                 ? 'bg-[var(--neon-purple)]/20 text-[var(--neon-purple-bright)] border-l-2 border-[var(--neon-purple)]' 
-                : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)]'
+                : 'hover:bg-[var(--dark-bg-secondary)]/50 text-[var(--dark-text)] active:bg-[var(--dark-bg-secondary)]'
             }`}
             onClick={() => onBranchSelect(branch.name)}
           >
-            <GitBranch className={`w-4 h-4 flex-shrink-0 ${
+            <GitBranch className={`w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0 ${
               index === selectedIndex ? 'text-[var(--neon-purple)]' : 'text-[var(--dark-text-secondary)]'
             }`} />
             <div className="flex-1 min-w-0">
@@ -87,7 +87,7 @@ export const BranchDropdown = ({
               </div>
               {branch.lastCommitDate && (
                 <div className="flex items-center gap-1 text-xs text-[var(--dark-text-secondary)] mt-1">
-                  <Clock className="w-3 h-3" />
+                  <Clock className="w-4 h-4 sm:w-3 sm:h-3" />
                   <span>Last commit {formatRelativeTime(branch.lastCommitDate)}</span>
                 </div>
               )}
