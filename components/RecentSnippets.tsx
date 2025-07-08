@@ -7,9 +7,11 @@ import { GitHubRepo, GitHubFile } from '@/lib/github/api'
 import { RecentSnippet, RecentSnippetsManager } from '@/lib/recentSnippets'
 import { Code, X, Copy, ExternalLink, CheckCircle, Eye } from 'lucide-react'
 import SnippetViewer from './SnippetViewer'
-import * as SimpleIcons from 'simple-icons'
 import { TimePill } from './ui/TimePill'
 import { ShineCard } from './ui/ShineCard'
+import { LanguageIcon } from './ui/LanguageIcon'
+import { CardActions } from './ui/CardActions'
+import { FilePathDisplay } from './ui/FilePathDisplay'
 
 interface RecentSnippetsProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
@@ -64,65 +66,6 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
   }
 
 
-  // Get language icon component
-  const getLanguageIcon = (language: string) => {
-    const getIconPath = (iconName: string): string | null => {
-      const icon = (SimpleIcons as any)[iconName]
-      return icon?.path || null
-    }
-
-    const iconMap: Record<string, { name: string; color: string }> = {
-      'javascript': { name: 'siJavascript', color: '#F7DF1E' },
-      'typescript': { name: 'siTypescript', color: '#3178C6' },
-      'jsx': { name: 'siReact', color: '#61DAFB' },
-      'tsx': { name: 'siReact', color: '#61DAFB' },
-      'python': { name: 'siPython', color: '#3776AB' },
-      'swift': { name: 'siSwift', color: '#F05138' },
-      'kotlin': { name: 'siKotlin', color: '#7F52FF' },
-      'java': { name: 'siOpenjdk', color: '#ED8B00' },
-      'cpp': { name: 'siCplusplus', color: '#00599C' },
-      'c': { name: 'siC', color: '#A8B9CC' },
-      'csharp': { name: 'siCsharp', color: '#239120' },
-      'ruby': { name: 'siRuby', color: '#CC342D' },
-      'go': { name: 'siGo', color: '#00ADD8' },
-      'rust': { name: 'siRust', color: '#000000' },
-      'php': { name: 'siPhp', color: '#777BB4' },
-      'html': { name: 'siHtml5', color: '#E34F26' },
-      'css': { name: 'siCss3', color: '#1572B6' },
-      'scss': { name: 'siSass', color: '#CC6699' },
-      'vue': { name: 'siVuedotjs', color: '#4FC08D' },
-      'svelte': { name: 'siSvelte', color: '#FF3E00' },
-      'dart': { name: 'siDart', color: '#0175C2' },
-      'dockerfile': { name: 'siDocker', color: '#2496ED' },
-      'json': { name: 'siJson', color: '#000000' },
-      'yaml': { name: 'siYaml', color: '#CB171E' },
-      'markdown': { name: 'siMarkdown', color: '#000000' },
-    }
-
-    const iconInfo = iconMap[language.toLowerCase()]
-    if (!iconInfo) {
-      return (
-        <Code className="w-4 h-4" style={{ color: '#888' }} />
-      )
-    }
-
-    const iconPath = getIconPath(iconInfo.name)
-    if (!iconPath) {
-      return (
-        <Code className="w-4 h-4" style={{ color: '#888' }} />
-      )
-    }
-
-    return (
-      <svg
-        className="w-4 h-4"
-        viewBox="0 0 24 24"
-        fill={iconInfo.color}
-      >
-        <path d={iconPath} />
-      </svg>
-    )
-  }
 
   // Truncate code for preview
   const getCodePreview = (code: string, maxLines: number = 3): string => {
@@ -144,10 +87,42 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {recentSnippets.map((snippet) => {
-          const languageIcon = getLanguageIcon(snippet.language)
           const lineRange = snippet.selectedLines.start === snippet.selectedLines.end 
             ? `L${snippet.selectedLines.start}` 
             : `L${snippet.selectedLines.start}-${snippet.selectedLines.end}`
+
+          const actions = [
+            {
+              icon: <Eye className="w-4 h-4" />,
+              onClick: (e: React.MouseEvent) => {
+                e.stopPropagation()
+                onFileSelect(snippet.repo, snippet.file, snippet.branch)
+              },
+              title: "View full file"
+            },
+            {
+              icon: copiedSnippet === snippet.id ? (
+                <CheckCircle className="w-4 h-4 text-green-400" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              ),
+              onClick: (e: React.MouseEvent) => copySnippet(snippet, e),
+              title: "Copy snippet"
+            },
+            {
+              icon: <ExternalLink className="w-4 h-4" />,
+              onClick: (e: React.MouseEvent) => {
+                e.stopPropagation()
+                window.open(`https://github.com/${snippet.repo.full_name}/blob/${snippet.branch}/${snippet.file.path}#L${snippet.selectedLines.start}-L${snippet.selectedLines.end}`, '_blank')
+              },
+              title: "View on GitHub"
+            },
+            {
+              icon: <X className="w-4 h-4" />,
+              onClick: (e: React.MouseEvent) => removeRecentSnippet(snippet.id, e),
+              title: "Remove snippet"
+            }
+          ]
           
           return (
             <ShineCard
@@ -162,56 +137,22 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                   <div className="font-medium text-[var(--dark-text)] truncate text-sm text-left">
                     {snippet.title}
                   </div>
-                  <div className="text-xs text-[var(--dark-text-secondary)] truncate mt-1 text-left">
-                    {snippet.repo.name}
-                    {snippet.branch && snippet.branch !== snippet.repo.default_branch && (
-                      <span className="text-[var(--neon-purple)] mx-1">:{snippet.branch}</span>
-                    )}
-                    /{snippet.file.path} {lineRange}
-                  </div>
+                  <FilePathDisplay 
+                    repoName={snippet.repo.name}
+                    filePath={snippet.file.path}
+                    branch={snippet.branch}
+                    defaultBranch={snippet.repo.default_branch}
+                    lineRange={lineRange}
+                    className="mt-1 text-left"
+                  />
                 </div>
                 
-                {/* Action buttons - positioned absolutely on desktop, inline on mobile */}
-                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 sm:absolute sm:top-0 sm:right-0 mt-2 sm:mt-0">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onFileSelect(snippet.repo, snippet.file, snippet.branch)
-                    }}
-                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
-                    title="View full file"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => copySnippet(snippet, e)}
-                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
-                    title="Copy snippet"
-                  >
-                    {copiedSnippet === snippet.id ? (
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </button>
-                  <a
-                    href={`https://github.com/${snippet.repo.full_name}/blob/${snippet.branch}/${snippet.file.path}#L${snippet.selectedLines.start}-L${snippet.selectedLines.end}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
-                    title="View on GitHub"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                  <button
-                    onClick={(e) => removeRecentSnippet(snippet.id, e)}
-                    className="p-2 min-w-[32px] min-h-[32px] flex items-center justify-center rounded hover:bg-[var(--dark-bg-secondary)] text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)]"
-                    title="Remove snippet"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+                {/* Action buttons */}
+                <CardActions 
+                  actions={actions}
+                  className="sm:absolute sm:top-0 sm:right-0 mt-2 sm:mt-0"
+                  alwaysVisible={true}
+                />
               </div>
 
               {/* Code preview */}
@@ -238,9 +179,7 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
               {/* Footer */}
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 flex items-center justify-center">
-                    {languageIcon}
-                  </div>
+                  <LanguageIcon language={snippet.language} size="md" />
                   <span className="text-[var(--neon-purple)]">{snippet.language}</span>
                 </div>
                 <TimePill timestamp={snippet.timestamp} />
