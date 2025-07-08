@@ -8,6 +8,7 @@ import { RecentSnippet, RecentSnippetsManager } from '@/lib/recentSnippets'
 import { Code, X, Copy, ExternalLink, CheckCircle, Eye } from 'lucide-react'
 import SnippetViewer from './SnippetViewer'
 import * as SimpleIcons from 'simple-icons'
+import { TimePill } from './ui/TimePill'
 
 interface RecentSnippetsProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
@@ -61,20 +62,6 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
     }
   }
 
-  // Format relative time
-  const getRelativeTime = (timestamp: number): string => {
-    const now = Date.now()
-    const diff = now - timestamp
-    
-    const minutes = Math.floor(diff / (1000 * 60))
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    
-    if (minutes < 1) return 'Just now'
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    return `${days}d ago`
-  }
 
   // Get language icon component
   const getLanguageIcon = (language: string) => {
@@ -168,8 +155,9 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
               onClick={() => setSelectedSnippet(snippet)}
             >
               {/* Header with actions */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0 text-left">
+              <div className="relative mb-3">
+                {/* Title and subtitle - full width when buttons are hidden */}
+                <div className="text-left sm:group-hover:pr-40 transition-all duration-200">
                   <div className="font-medium text-[var(--dark-text)] truncate text-sm text-left">
                     {snippet.title}
                   </div>
@@ -182,8 +170,8 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                   </div>
                 </div>
                 
-                {/* Action buttons */}
-                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
+                {/* Action buttons - positioned absolutely on desktop, inline on mobile */}
+                <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 sm:absolute sm:top-0 sm:right-0 mt-2 sm:mt-0">
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -254,9 +242,7 @@ export default function RecentSnippets({ onFileSelect }: RecentSnippetsProps) {
                   </div>
                   <span className="text-[var(--neon-purple)]">{snippet.language}</span>
                 </div>
-                <span className="text-[var(--dark-text-secondary)]">
-                  {getRelativeTime(snippet.timestamp)}
-                </span>
+                <TimePill timestamp={snippet.timestamp} />
               </div>
             </div>
           )

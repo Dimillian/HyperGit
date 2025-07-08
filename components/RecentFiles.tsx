@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
 import { RecentFile, RecentFilesManager } from '@/lib/recentFiles'
-import { File, Clock, X } from 'lucide-react'
+import { Clock, X } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
+import { TimePill } from './ui/TimePill'
 
 interface RecentFilesProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
@@ -44,20 +45,6 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
     refreshRecentFiles()
   }
 
-  // Format relative time
-  const getRelativeTime = (timestamp: number): string => {
-    const now = Date.now()
-    const diff = now - timestamp
-    
-    const minutes = Math.floor(diff / (1000 * 60))
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    
-    if (minutes < 1) return 'Just now'
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    return `${days}d ago`
-  }
 
   // Get file extension for styling
   const getFileExtension = (filename: string): string => {
@@ -102,14 +89,14 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
     const iconInfo = iconMap[ext]
     if (!iconInfo) {
       return (
-        <File className="w-3 h-3" style={{ color: '#888' }} />
+        <div className="w-3 h-3 bg-gray-400 rounded-sm" />
       )
     }
 
     const iconPath = getIconPath(iconInfo.name)
     if (!iconPath) {
       return (
-        <File className="w-3 h-3" style={{ color: '#888' }} />
+        <div className="w-3 h-3 bg-gray-400 rounded-sm" />
       )
     }
 
@@ -156,26 +143,21 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
                 <X className="w-3 h-3" />
               </button>
               
-              <div className="flex items-start gap-3">
-                <File className="w-4 h-4 flex-shrink-0 mt-0.5 text-[var(--neon-purple)]" />
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="font-medium text-[var(--dark-text)] truncate text-left">{file.name}</div>
-                  <div className="text-xs text-[var(--dark-text-secondary)] truncate mt-1 text-left">
-                    {repo.name}
-                    {branch && branch !== repo.default_branch && (
-                      <span className="text-[var(--neon-purple)] mx-1">:{branch}</span>
-                    )}
-                    /{file.path}
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-[var(--neon-purple)] bg-[var(--neon-purple)]/10 rounded flex items-center gap-1">
-                      {languageIcon}
-                      <span>{extension || 'file'}</span>
-                    </span>
-                    <span className="text-xs text-[var(--dark-text-secondary)]">
-                      {getRelativeTime(timestamp)}
-                    </span>
-                  </div>
+              <div className="text-left">
+                <div className="font-medium text-[var(--dark-text)] truncate text-left">{file.name}</div>
+                <div className="text-xs text-[var(--dark-text-secondary)] truncate mt-1 text-left">
+                  {repo.name}
+                  {branch && branch !== repo.default_branch && (
+                    <span className="text-[var(--neon-purple)] mx-1">:{branch}</span>
+                  )}
+                  /{file.path}
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs text-[var(--neon-purple)] bg-[var(--neon-purple)]/10 rounded flex items-center gap-1">
+                    {languageIcon}
+                    <span>{extension || 'file'}</span>
+                  </span>
+                  <TimePill timestamp={timestamp} />
                 </div>
               </div>
             </div>
