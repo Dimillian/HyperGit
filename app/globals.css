@@ -14,6 +14,15 @@
     --dark-text-secondary: #a3a3a3;
     --dark-border: #1a1a1a;
   }
+  
+  @keyframes slide {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(400%);
+    }
+  }
 
   body {
     @apply bg-[var(--dark-bg)] text-[var(--dark-text)] min-h-screen;

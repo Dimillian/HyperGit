@@ -239,8 +239,8 @@ export class GitHubAPI {
     return result
   }
 
-  // Get user's repositories
-  async getUserRepositories(): Promise<GitHubRepo[]> {
+  // Get user's repositories with optional progress callback
+  async getUserRepositories(onProgress?: (loaded: number, total: number) => void): Promise<GitHubRepo[]> {
     const allRepos: GitHubRepo[] = []
     let page = 1
     const perPage = 100
@@ -253,6 +253,11 @@ export class GitHubAPI {
       }
       
       allRepos.push(...repos)
+      
+      // Report progress - use 0 for total to indicate unknown
+      if (onProgress) {
+        onProgress(allRepos.length, 0)
+      }
       
       // If we got less than perPage, we've reached the end
       if (repos.length < perPage) {

@@ -17,7 +17,7 @@ export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile; branch?: string } | null>(null)
   const [recentFilesKey, setRecentFilesKey] = useState(0)
   const [recentSnippetsKey, setRecentSnippetsKey] = useState(0)
-  const { isAuthenticated, repositories, clearToken, loading, isInitializing } = useGitHub()
+  const { isAuthenticated, repositories, clearToken, loading, isInitializing, loadingProgress } = useGitHub()
 
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile, branch?: string) => {
     // Track the file visit with branch information
@@ -42,7 +42,7 @@ export default function Home() {
 
   // Show loading screen while initializing
   if (isInitializing) {
-    return <LoadingScreen />
+    return <LoadingScreen loadingProgress={loadingProgress} />
   }
 
   // Show login screen if not authenticated

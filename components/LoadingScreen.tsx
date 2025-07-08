@@ -1,6 +1,19 @@
 'use client'
 
-export default function LoadingScreen() {
+interface LoadingScreenProps {
+  loadingProgress?: {
+    loaded: number
+    total: number
+  }
+}
+
+export default function LoadingScreen({ loadingProgress }: LoadingScreenProps) {
+  // When total is 0, we don't know the total, so show indeterminate progress
+  const hasTotal = loadingProgress && loadingProgress.total > 0
+  const progress = hasTotal
+    ? (loadingProgress.loaded / loadingProgress.total) * 100 
+    : 0
+    
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--dark-bg)] via-[var(--dark-bg-secondary)] to-[var(--dark-bg)]">
       <div className="text-center space-y-8">
@@ -35,19 +48,40 @@ export default function LoadingScreen() {
 
         {/* Loading Text */}
         <div className="space-y-2">
-          <p className="text-lg text-[var(--dark-text)] animate-pulse">
-            Initializing HyperGit...
+          <p className="text-lg text-[var(--dark-text)]">
+            {loadingProgress && loadingProgress.loaded > 0 ? 'Loading repositories...' : 'Initializing HyperGit...'}
           </p>
           <p className="text-sm text-[var(--dark-text-secondary)]">
-            Loading your GitHub repositories
+            {loadingProgress && loadingProgress.loaded > 0 
+              ? `${loadingProgress.loaded} repositories loaded`
+              : 'Connecting to GitHub'
+            }
           </p>
         </div>
 
-        {/* Progress Bar Animation */}
+        {/* Progress Bar */}
         <div className="w-64 mx-auto">
-          <div className="h-1 bg-[var(--dark-border)] rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] rounded-full animate-pulse"></div>
+          <div className="h-2 bg-[var(--dark-border)] rounded-full overflow-hidden">
+            {loadingProgress && loadingProgress.loaded > 0 ? (
+              // Indeterminate progress animation when we don't know the total
+              <div className="h-full relative">
+                <div 
+                  className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[var(--neon-purple)] to-transparent animate-[slide_1.5s_ease-in-out_infinite]"
+                />
+              </div>
+            ) : (
+              // Static bar when initializing
+              <div 
+                className="h-full bg-gradient-to-r from-[var(--neon-purple)] to-[var(--neon-purple-bright)] rounded-full"
+                style={{ width: '5%' }}
+              />
+            )}
           </div>
+          {loadingProgress && loadingProgress.loaded > 0 && (
+            <p className="text-xs text-[var(--neon-purple)] mt-2">
+              Loading...
+            </p>
+          )}
         </div>
       </div>
     </div>

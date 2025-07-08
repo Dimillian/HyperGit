@@ -7,6 +7,7 @@ export function useGitHub() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [loadingProgress, setLoadingProgress] = useState({ loaded: 0, total: 0 })
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -38,9 +39,12 @@ export function useGitHub() {
   const loadRepositories = async (token: string) => {
     setLoading(true)
     setError(null)
+    setLoadingProgress({ loaded: 0, total: 0 })
     try {
       const api = new GitHubAPI(token)
-      const repos = await api.getUserRepositories()
+      const repos = await api.getUserRepositories((loaded, total) => {
+        setLoadingProgress({ loaded, total })
+      })
       setRepositories(repos)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load repositories')
@@ -69,6 +73,7 @@ export function useGitHub() {
     setToken,
     clearToken,
     isAuthenticated: !!github,
-    isInitializing
+    isInitializing,
+    loadingProgress
   }
 }
