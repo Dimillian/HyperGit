@@ -13,9 +13,10 @@ export class FileTreeCache {
   private maxAge = 5 * 60 * 1000 // 5 minutes
   private maxSize = 50 // Maximum number of repositories to cache
 
-  // Get cached file tree for a repository
-  get(repoFullName: string): GitHubFile[] | null {
-    const entry = this.cache.get(repoFullName)
+  // Get cached file tree for a repository and branch
+  get(repoFullName: string, branch?: string): GitHubFile[] | null {
+    const cacheKey = branch ? `${repoFullName}:${branch}` : repoFullName
+    const entry = this.cache.get(cacheKey)
     
     if (!entry) {
       return null
@@ -23,21 +24,23 @@ export class FileTreeCache {
 
     // Check if cache is expired
     if (Date.now() - entry.timestamp > this.maxAge) {
-      this.cache.delete(repoFullName)
+      this.cache.delete(cacheKey)
       return null
     }
 
     // Move to end (LRU)
-    this.cache.delete(repoFullName)
-    this.cache.set(repoFullName, entry)
+    this.cache.delete(cacheKey)
+    this.cache.set(cacheKey, entry)
 
     return entry.files
   }
 
-  // Set cached file tree for a repository
-  set(repoFullName: string, files: GitHubFile[]): void {
+  // Set cached file tree for a repository and branch
+  set(repoFullName: string, files: GitHubFile[], branch?: string): void {
+    const cacheKey = branch ? `${repoFullName}:${branch}` : repoFullName
+    
     // Remove oldest entry if cache is full (LRU eviction)
-    if (this.cache.size >= this.maxSize && !this.cache.has(repoFullName)) {
+    if (this.cache.size >= this.maxSize && !this.cache.has(cacheKey)) {
       const firstKey = this.cache.keys().next().value
       if (firstKey) {
         this.cache.delete(firstKey)
@@ -53,17 +56,17 @@ export class FileTreeCache {
       useExtendedSearch: true
     })
 
-    this.cache.set(repoFullName, {
+    this.cache.set(cacheKey, {
       files,
       timestamp: Date.now(),
-      repoFullName,
+      repoFullName: cacheKey, // Store the full cache key for consistency
       fuse
     })
 
     // Also save to localStorage for persistence (only for smaller repos)
     if (files.length < 5000) {
       try {
-        const storageKey = `hypergit_tree_${repoFullName}`
+        const storageKey = `hypergit_tree_${cacheKey}`
         localStorage.setItem(storageKey, JSON.stringify({
           files: files.slice(0, 1000), // Limit stored files
           timestamp: Date.now()
@@ -79,9 +82,10 @@ export class FileTreeCache {
   }
 
   // Load from localStorage if available
-  loadFromStorage(repoFullName: string): GitHubFile[] | null {
+  loadFromStorage(repoFullName: string, branch?: string): GitHubFile[] | null {
     try {
-      const storageKey = `hypergit_tree_${repoFullName}`
+      const cacheKey = branch ? `${repoFullName}:${branch}` : repoFullName
+      const storageKey = `hypergit_tree_${cacheKey}`
       const stored = localStorage.getItem(storageKey)
       
       if (!stored) return null
@@ -125,11 +129,12 @@ export class FileTreeCache {
     }
   }
 
-  // Clear cache for a specific repository
-  clear(repoFullName: string): void {
-    this.cache.delete(repoFullName)
+  // Clear cache for a specific repository and branch
+  clear(repoFullName: string, branch?: string): void {
+    const cacheKey = branch ? `${repoFullName}:${branch}` : repoFullName
+    this.cache.delete(cacheKey)
     try {
-      localStorage.removeItem(`hypergit_tree_${repoFullName}`)
+      localStorage.removeItem(`hypergit_tree_${cacheKey}`)
     } catch {
       // Ignore
     }
@@ -151,13 +156,14 @@ export class FileTreeCache {
   }
 
   // Search files in cached tree with fuzzy search
-  searchFiles(repoFullName: string, query: string): GitHubFile[] {
-    const entry = this.cache.get(repoFullName)
+  searchFiles(repoFullName: string, query: string, branch?: string): GitHubFile[] {
+    const cacheKey = branch ? `${repoFullName}:${branch}` : repoFullName
+    const entry = this.cache.get(cacheKey)
     if (!entry || !entry.fuse) return []
 
     // Check if cache is expired
     if (Date.now() - entry.timestamp > this.maxAge) {
-      this.cache.delete(repoFullName)
+      this.cache.delete(cacheKey)
       return []
     }
 

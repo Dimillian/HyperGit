@@ -10,12 +10,13 @@ interface FileDropdownProps {
   selectedIndex: number
   currentPath: string
   beforeAt: string
+  branch?: string
   setMode: (mode: 'repos' | 'files') => void
   setSelectedRepo: (repo: GitHubRepo | null) => void
   setQuery: (query: string) => void
   setCurrentPath: (path: string) => void
   navigateToFolder: (path: string) => void
-  onFileSelect: (repo: GitHubRepo, file: GitHubFile) => void
+  onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
   setIsDropdownOpen: (open: boolean) => void
 }
 
@@ -28,6 +29,7 @@ export const FileDropdown = ({
   selectedIndex,
   currentPath,
   beforeAt,
+  branch,
   setMode,
   setSelectedRepo,
   setQuery,
@@ -43,7 +45,14 @@ export const FileDropdown = ({
       <div className="p-4 border-b border-[var(--dark-border)] text-sm font-medium text-[var(--neon-purple)]">
         <div className="flex items-center justify-between mb-2">
           <span>
-            {selectedRepo?.name} - {isCacheBuilding ? 'Loading files...' : isSearching ? 'Searching...' : 'Files'}
+            {selectedRepo?.name}
+            {branch && branch !== selectedRepo?.default_branch && (
+              <span className="text-xs text-[var(--dark-text-secondary)] ml-2">
+                : {branch}
+              </span>
+            )}
+            {' - '}
+            {isCacheBuilding ? 'Loading files...' : isSearching ? 'Searching...' : 'Files'}
           </span>
           <button
             onClick={() => {
@@ -116,7 +125,8 @@ export const FileDropdown = ({
               if (file.type === 'dir') {
                 navigateToFolder(file.path)
               } else {
-                onFileSelect(selectedRepo, file)
+                const currentBranch = branch || selectedRepo.default_branch
+                onFileSelect(selectedRepo, file, currentBranch)
                 setIsDropdownOpen(false)
               }
             }}

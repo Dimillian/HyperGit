@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { GitHubRepo, GitHubFile } from '@/lib/github/api'
+import { GitHubRepo, GitHubFile, GitHubBranch } from '@/lib/github/api'
 import { fileTreeCache } from '@/lib/github/cache'
 import { Search } from 'lucide-react'
 import { useGitHub } from '@/hooks/useGitHub'
@@ -10,9 +10,10 @@ import { useKeyboardNavigation } from './SearchBar/hooks/useKeyboardNavigation'
 import { getItemsForPath, parseQuery } from './SearchBar/utils/folderUtils'
 import { RepositoryDropdown } from './SearchBar/components/RepositoryDropdown'
 import { FileDropdown } from './SearchBar/components/FileDropdown'
+import { BranchDropdown } from './SearchBar/components/BranchDropdown'
 
 interface SearchBarProps {
-  onFileSelect: (repo: GitHubRepo, file: GitHubFile) => void
+  onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
   onRepoSelect?: (repo: GitHubRepo) => void
 }
 
@@ -20,22 +21,34 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
   function SearchBar({ onFileSelect, onRepoSelect }, ref) {
   const [query, setQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [mode, setMode] = useState<'repos' | 'files'>('repos')
+  const [mode, setMode] = useState<'repos' | 'files' | 'branches'>('repos')
   const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(null)
   const [searchResults, setSearchResults] = useState<GitHubFile[]>([])
   const [currentPath, setCurrentPath] = useState<string>('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isSearching, setIsSearching] = useState(false)
   const [isCacheBuilding, setIsCacheBuilding] = useState(false)
+  const [branches, setBranches] = useState<GitHubBranch[]>([])
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false)
   
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { github, repositories, isAuthenticated } = useGitHub()
 
-  const { beforeAt, afterAt } = parseQuery(query)
+  const { beforeAt, afterAt, repoName, branch, filePath } = parseQuery(query)
+  
+  // Determine if we should be in branch mode
+  const colonIndex = afterAt.indexOf(':')
+  const slashIndex = afterAt.indexOf('/')
+  const shouldShowBranches = colonIndex > 0 && slashIndex === -1  // Only show branches if no slash after colon
   
   // Filter repositories based on query
   const filteredRepos = repositories.filter(repo => 
-    afterAt === '' || repo.name.toLowerCase().includes(afterAt.toLowerCase())
+    afterAt === '' || repo.name.toLowerCase().includes(repoName.toLowerCase())
+  )
+  
+  // Filter branches based on query
+  const filteredBranches = branches.filter(branchObj =>
+    !branch || branchObj.name.toLowerCase().includes(branch.toLowerCase())
   )
   
   // Use custom hooks
@@ -47,10 +60,13 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
   )
 
   // Handle repository selection
-  const selectRepository = async (repo: GitHubRepo, fromCard = false) => {
+  const selectRepository = async (repo: GitHubRepo, fromCard = false, targetBranch?: string) => {
     setSelectedRepo(repo)
     setMode('files')
-    setQuery(beforeAt + '@' + repo.name + '/')
+    
+    // Build query with or without branch
+    const branchSuffix = targetBranch ? `:${targetBranch}` : ''
+    setQuery(beforeAt + '@' + repo.name + branchSuffix + '/')
     setSelectedIndex(0)
     setCurrentPath('') // Reset to root when selecting a repo
     
@@ -63,25 +79,28 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     }
     
     try {
-      // Check cache first
-      let files = fileTreeCache.get(repo.full_name)
+      // Use the target branch or current branch from query, or default branch
+      const branchToUse = targetBranch || branch || repo.default_branch
+      
+      // Check cache first (branch-specific)
+      let files = fileTreeCache.get(repo.full_name, branchToUse)
       
       if (!files) {
         // If not in cache, try loading from localStorage
-        files = fileTreeCache.loadFromStorage(repo.full_name)
+        files = fileTreeCache.loadFromStorage(repo.full_name, branchToUse)
         
         if (!files) {
           // If not in storage, fetch from API
           setIsCacheBuilding(true)
           const repoInfo = { owner: repo.full_name.split('/')[0], repo: repo.name }
-          files = await github!.getRepositoryTree(repoInfo.owner, repoInfo.repo)
+          files = await github!.getRepositoryTree(repoInfo.owner, repoInfo.repo, branchToUse)
           
-          // Cache the results
-          fileTreeCache.set(repo.full_name, files)
+          // Cache the results (branch-specific)
+          fileTreeCache.set(repo.full_name, files, branchToUse)
           setIsCacheBuilding(false)
         } else {
           // Re-cache from storage
-          fileTreeCache.set(repo.full_name, files)
+          fileTreeCache.set(repo.full_name, files, branchToUse)
         }
       }
       
@@ -127,11 +146,25 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     setSelectedIndex(0)
     
     // Update search results to show contents of the folder
-    const cachedFiles = fileTreeCache.get(selectedRepo!.full_name)
+    const branchToUse = branch || selectedRepo!.default_branch
+    const cachedFiles = fileTreeCache.get(selectedRepo!.full_name, branchToUse)
     if (cachedFiles) {
       const folderItems = getItemsForPath(cachedFiles, folderPath)
       setSearchResults(folderItems)
     }
+  }
+
+  // Handle branch selection
+  const selectBranch = async (branchName: string) => {
+    if (!selectedRepo) return
+    
+    // Update query with selected branch
+    setQuery(beforeAt + '@' + selectedRepo.name + ':' + branchName + '/')
+    setBranches([])
+    setSelectedIndex(0)
+    
+    // Load files for the selected branch - this will switch to file mode
+    await selectRepository(selectedRepo, false, branchName)
   }
 
   // Use keyboard navigation hook
@@ -142,6 +175,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     setSelectedIndex,
     filteredRepos,
     searchResults,
+    filteredBranches,
     dropdownRef,
     currentPath,
     setCurrentPath,
@@ -150,10 +184,12 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     setSelectedRepo,
     setQuery,
     beforeAt,
+    branch,
     selectRepository,
     navigateToFolder,
     onFileSelect,
-    selectedRepo
+    selectedRepo,
+    selectBranch
   })
 
   // Expose methods to parent component
@@ -165,16 +201,16 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
   // Handle file search when in file mode
   useEffect(() => {
     if (mode === 'files' && selectedRepo) {
-      const pathQuery = afterAt.split('/').slice(1).join('/')
+      const branchToUse = branch || selectedRepo.default_branch
       
-      if (pathQuery.length > 0) {
+      if (filePath.length > 0) {
         // Use local search with shorter debounce
         const searchTimeout = setTimeout(() => {
           setIsSearching(true)
           
           try {
-            // Search in cached files
-            const results = fileTreeCache.searchFiles(selectedRepo.full_name, pathQuery)
+            // Search in cached files (branch-specific)
+            const results = fileTreeCache.searchFiles(selectedRepo.full_name, filePath, branchToUse)
             setSearchResults(results)
           } catch (error) {
             console.error('Search failed:', error)
@@ -187,7 +223,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
         return () => clearTimeout(searchTimeout)
       } else {
         // Show items for current path when no search query
-        const cachedFiles = fileTreeCache.get(selectedRepo.full_name)
+        const cachedFiles = fileTreeCache.get(selectedRepo.full_name, branchToUse)
         if (cachedFiles) {
           const pathItems = getItemsForPath(cachedFiles, currentPath)
           setSearchResults(pathItems)
@@ -195,13 +231,13 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
         setIsSearching(false)
       }
     }
-  }, [afterAt, mode, selectedRepo, currentPath])
+  }, [filePath, mode, selectedRepo, currentPath, branch])
 
 
   // Reset selection when switching modes or query changes
   useEffect(() => {
     setSelectedIndex(0)
-  }, [mode, afterAt])
+  }, [mode, repoName, branch, filePath])
 
   // Reset state when search bar is emptied
   useEffect(() => {
@@ -223,12 +259,66 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
       
       // Show dropdown if:
       // 1. Query is empty (show repos)
-      // 2. Query contains @ (show repos or files)
+      // 2. Query contains @ (show repos or files or branches)
       // 3. We're in file mode (already selected a repo)
-      const shouldShowDropdown = isEmpty || hasAtSymbol || mode === 'files'
+      // 4. We're in branch mode (selecting a branch)
+      const shouldShowDropdown = isEmpty || hasAtSymbol || mode === 'files' || mode === 'branches'
       setIsDropdownOpen(shouldShowDropdown)
     }
   }, [query, isAuthenticated, mode])
+
+  // Detect when to show branch autocomplete
+  useEffect(() => {
+    if (shouldShowBranches) {
+      // User typed : after repo name
+      const repoNameFromQuery = afterAt.substring(0, colonIndex)
+      
+      // Find the matching repository
+      const matchingRepo = repositories.find(r => 
+        r.name.toLowerCase() === repoNameFromQuery.toLowerCase()
+      )
+      
+      if (matchingRepo) {
+        if (selectedRepo?.name !== matchingRepo.name) {
+          setSelectedRepo(matchingRepo)
+          setBranches([]) // Clear branches when repo changes
+        }
+        
+        if (mode !== 'branches') {
+          setMode('branches')
+        }
+        
+        // Fetch branches for this repository if not already loaded
+        if (branches.length === 0 && !isLoadingBranches) {
+          const fetchBranches = async () => {
+            setIsLoadingBranches(true)
+            try {
+              const repoInfo = { owner: matchingRepo.full_name.split('/')[0], repo: matchingRepo.name }
+              const repoBranches = await github!.getRepositoryBranches(repoInfo.owner, repoInfo.repo)
+              setBranches(repoBranches)
+            } catch (error) {
+              console.error('Failed to fetch branches:', error)
+              setBranches([])
+            } finally {
+              setIsLoadingBranches(false)
+            }
+          }
+          
+          fetchBranches()
+        }
+      }
+    } else if (mode === 'branches' && !shouldShowBranches) {
+      // User removed the colon or added slash, check what to do
+      if (slashIndex > colonIndex && colonIndex > 0) {
+        // User added slash after branch selection, should be in file mode now
+        // The selectRepository call from selectBranch should have handled this
+      } else {
+        // User removed the colon, go back to repo mode
+        setMode('repos')
+        setBranches([])
+      }
+    }
+  }, [shouldShowBranches, afterAt, repositories, github, mode, selectedRepo, branches.length, isLoadingBranches, colonIndex, slashIndex])
 
   return (
     <div className="relative w-full max-w-2xl mx-auto">
@@ -247,7 +337,8 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
               
               // If we're in file mode but have no search results, show the folder contents
               if (mode === 'files' && selectedRepo && searchResults.length === 0) {
-                const cachedFiles = fileTreeCache.get(selectedRepo.full_name)
+                const branchToUse = branch || selectedRepo.default_branch
+                const cachedFiles = fileTreeCache.get(selectedRepo.full_name, branchToUse)
                 if (cachedFiles) {
                   const pathItems = getItemsForPath(cachedFiles, currentPath)
                   setSearchResults(pathItems)
@@ -263,7 +354,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
               }
             }, 150)
           }}
-          placeholder={isAuthenticated ? "Type @repo-name/file-path to search..." : "Please login with GitHub first"}
+          placeholder={isAuthenticated ? "Type @repo-name or @repo-name:branch/file-path to search..." : "Please login with GitHub first"}
           disabled={!isAuthenticated}
           className="w-full pl-12 pr-6 py-5 text-lg rounded-2xl glass-effect text-[var(--dark-text)] placeholder-[var(--dark-text-secondary)] focus:outline-none focus:border-[var(--neon-purple)] focus:neon-glow transition-all duration-300 shiny-surface"
         />
@@ -275,10 +366,25 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
           ref={dropdownRef}
           className="absolute top-full mt-3 w-full glass-effect border border-[var(--neon-purple)]/30 rounded-2xl max-h-80 overflow-y-auto z-50 backdrop-blur-xl"
         >
-          {mode === 'repos' ? (
+          {mode === 'branches' || (mode === 'repos' && shouldShowBranches) ? (
+            selectedRepo ? (
+              <BranchDropdown
+                selectedRepo={selectedRepo}
+                isLoadingBranches={isLoadingBranches}
+                filteredBranches={filteredBranches}
+                selectedIndex={selectedIndex}
+                beforeAt={beforeAt}
+                onBranchSelect={selectBranch}
+              />
+            ) : (
+              <div className="p-4 text-[var(--dark-text-secondary)] text-center">
+                No matching repository found
+              </div>
+            )
+          ) : mode === 'repos' ? (
             <RepositoryDropdown
               filteredRepos={filteredRepos}
-              afterAt={afterAt}
+              afterAt={repoName}
               selectedIndex={selectedIndex}
               selectRepository={selectRepository}
             />
@@ -288,10 +394,11 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
               isCacheBuilding={isCacheBuilding}
               isSearching={isSearching}
               searchResults={searchResults}
-              afterAt={afterAt}
+              afterAt={filePath}
               selectedIndex={selectedIndex}
               currentPath={currentPath}
               beforeAt={beforeAt}
+              branch={branch}
               setMode={setMode}
               setSelectedRepo={setSelectedRepo}
               setQuery={setQuery}

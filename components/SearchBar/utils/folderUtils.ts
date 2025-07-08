@@ -55,13 +55,51 @@ const createFolderItem = (name: string, path: string): GitHubFile => ({
   size: 0
 })
 
-// Parse the @ mention query
+// Parse the @ mention query with branch support
 export const parseQuery = (input: string) => {
   const atIndex = input.lastIndexOf('@')
-  if (atIndex === -1) return { beforeAt: input, afterAt: '' }
+  if (atIndex === -1) return { beforeAt: input, afterAt: '', repoName: '', branch: '', filePath: '' }
+  
+  const beforeAt = input.substring(0, atIndex)
+  const afterAt = input.substring(atIndex + 1)
+  
+  // Parse branch syntax: repo-name:branch-name/file-path
+  const colonIndex = afterAt.indexOf(':')
+  const slashIndex = afterAt.indexOf('/')
+  
+  let repoName = ''
+  let branch = ''
+  let filePath = ''
+  
+  if (colonIndex > 0 && (slashIndex === -1 || colonIndex < slashIndex)) {
+    // Branch syntax detected
+    repoName = afterAt.substring(0, colonIndex)
+    const afterColon = afterAt.substring(colonIndex + 1)
+    const branchSlashIndex = afterColon.indexOf('/')
+    
+    if (branchSlashIndex === -1) {
+      branch = afterColon
+      filePath = ''
+    } else {
+      branch = afterColon.substring(0, branchSlashIndex)
+      filePath = afterColon.substring(branchSlashIndex + 1)
+    }
+  } else {
+    // Standard syntax: repo-name/file-path
+    if (slashIndex === -1) {
+      repoName = afterAt
+      filePath = ''
+    } else {
+      repoName = afterAt.substring(0, slashIndex)
+      filePath = afterAt.substring(slashIndex + 1)
+    }
+  }
   
   return {
-    beforeAt: input.substring(0, atIndex),
-    afterAt: input.substring(atIndex + 1)
+    beforeAt,
+    afterAt,
+    repoName,
+    branch,
+    filePath
   }
 }

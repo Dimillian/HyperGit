@@ -1,25 +1,28 @@
 import { useEffect } from 'react'
-import { GitHubRepo, GitHubFile } from '@/lib/github/api'
+import { GitHubRepo, GitHubFile, GitHubBranch } from '@/lib/github/api'
 
 interface UseKeyboardNavigationProps {
   isDropdownOpen: boolean
-  mode: 'repos' | 'files'
+  mode: 'repos' | 'files' | 'branches'
   selectedIndex: number
   setSelectedIndex: (index: number | ((prev: number) => number)) => void
   filteredRepos: GitHubRepo[]
   searchResults: GitHubFile[]
+  filteredBranches?: GitHubBranch[]
   dropdownRef: React.RefObject<HTMLDivElement | null>
   currentPath: string
   setCurrentPath: (path: string) => void
   setIsDropdownOpen: (open: boolean) => void
-  setMode: (mode: 'repos' | 'files') => void
+  setMode: (mode: 'repos' | 'files' | 'branches') => void
   setSelectedRepo: (repo: GitHubRepo | null) => void
   setQuery: (query: string) => void
   beforeAt: string
+  branch?: string
   selectRepository: (repo: GitHubRepo) => void
   navigateToFolder: (path: string) => void
-  onFileSelect: (repo: GitHubRepo, file: GitHubFile) => void
+  onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
   selectedRepo: GitHubRepo | null
+  selectBranch?: (branch: string) => void
 }
 
 export const useKeyboardNavigation = ({
@@ -29,6 +32,7 @@ export const useKeyboardNavigation = ({
   setSelectedIndex,
   filteredRepos,
   searchResults,
+  filteredBranches = [],
   dropdownRef,
   currentPath,
   setCurrentPath,
@@ -37,10 +41,12 @@ export const useKeyboardNavigation = ({
   setSelectedRepo,
   setQuery,
   beforeAt,
+  branch,
   selectRepository,
   navigateToFolder,
   onFileSelect,
-  selectedRepo
+  selectedRepo,
+  selectBranch
 }: UseKeyboardNavigationProps) => {
   
   const scrollToSelectedItem = (newIndex: number) => {
@@ -57,7 +63,14 @@ export const useKeyboardNavigation = ({
   }
 
   const handleArrowNavigation = (direction: 'up' | 'down') => {
-    const maxIndex = mode === 'repos' ? filteredRepos.length - 1 : searchResults.length - 1
+    let maxIndex: number
+    if (mode === 'repos') {
+      maxIndex = filteredRepos.length - 1
+    } else if (mode === 'branches') {
+      maxIndex = filteredBranches.length - 1
+    } else {
+      maxIndex = searchResults.length - 1
+    }
     
     setSelectedIndex((prev: number) => {
       let newIndex: number
@@ -74,12 +87,15 @@ export const useKeyboardNavigation = ({
   const handleEnter = () => {
     if (mode === 'repos' && filteredRepos[selectedIndex]) {
       selectRepository(filteredRepos[selectedIndex])
+    } else if (mode === 'branches' && filteredBranches[selectedIndex] && selectBranch) {
+      selectBranch(filteredBranches[selectedIndex].name)
     } else if (mode === 'files' && searchResults[selectedIndex]) {
       const selectedItem = searchResults[selectedIndex]
       if (selectedItem.type === 'dir') {
         navigateToFolder(selectedItem.path)
       } else {
-        onFileSelect(selectedRepo!, selectedItem)
+        const currentBranch = branch || selectedRepo!.default_branch
+        onFileSelect(selectedRepo!, selectedItem, currentBranch)
         setIsDropdownOpen(false)
       }
     }
@@ -90,6 +106,10 @@ export const useKeyboardNavigation = ({
       // Go back one folder level
       const lastSlash = currentPath.lastIndexOf('/')
       setCurrentPath(lastSlash > 0 ? currentPath.substring(0, lastSlash) : '')
+    } else if (mode === 'branches') {
+      // Go back to repository mode
+      setMode('repos')
+      setQuery(beforeAt + '@' + selectedRepo?.name)
     } else {
       setIsDropdownOpen(false)
       if (mode === 'files') {
@@ -126,5 +146,5 @@ export const useKeyboardNavigation = ({
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isDropdownOpen, mode, selectedIndex, filteredRepos, searchResults, selectedRepo, beforeAt, currentPath])
+  }, [isDropdownOpen, mode, selectedIndex, filteredRepos, searchResults, filteredBranches, selectedRepo, beforeAt, currentPath])
 }

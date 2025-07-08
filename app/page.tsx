@@ -13,18 +13,18 @@ import { LogOut, GitBranch, Clock, File } from 'lucide-react'
 import * as SimpleIcons from 'simple-icons'
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile } | null>(null)
+  const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile; branch?: string } | null>(null)
   const [recentFilesKey, setRecentFilesKey] = useState(0)
   const { isAuthenticated, repositories, clearToken, loading, isInitializing } = useGitHub()
 
-  const handleFileSelect = (repo: GitHubRepo, file: GitHubFile) => {
+  const handleFileSelect = (repo: GitHubRepo, file: GitHubFile, branch?: string) => {
     // Track the file visit
     RecentFilesManager.addRecentFile(repo, file)
     
     // Force re-render of recent files component
     setRecentFilesKey(prev => prev + 1)
     
-    setSelectedFile({ repo, file })
+    setSelectedFile({ repo, file, branch })
   }
 
   const handleRepoSelect = (repo: GitHubRepo) => {
@@ -234,7 +234,7 @@ export default function Home() {
                           <span className="text-xs text-[var(--neon-purple)]">{repo.language || 'Unknown'}</span>
                         </div>
                         <span className="text-xs text-[var(--dark-text-secondary)]">
-                          {new Date(repo.updated_at).toLocaleDateString()}
+                          {new Date(repo.pushed_at || repo.updated_at).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -300,6 +300,7 @@ export default function Home() {
         <FileViewer
           repo={selectedFile.repo}
           file={selectedFile.file}
+          branch={selectedFile.branch}
           onClose={() => setSelectedFile(null)}
         />
       )}

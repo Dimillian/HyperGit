@@ -11,10 +11,11 @@ import CodeSnippetShare from './CodeSnippetShare'
 interface FileViewerProps {
   repo: GitHubRepo
   file: GitHubFile
+  branch?: string
   onClose: () => void
 }
 
-export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
+export default function FileViewer({ repo, file, branch, onClose }: FileViewerProps) {
   const [content, setContent] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +34,7 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
       setError(null)
       try {
         const repoInfo = { owner: repo.full_name.split('/')[0], repo: repo.name }
-        const fileContent = await github.getFileContent(repoInfo.owner, repoInfo.repo, file.path)
+        const fileContent = await github.getFileContent(repoInfo.owner, repoInfo.repo, file.path, branch)
         setContent(fileContent.content)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load file')
@@ -43,7 +44,7 @@ export default function FileViewer({ repo, file, onClose }: FileViewerProps) {
     }
 
     loadFileContent()
-  }, [github, repo, file])
+  }, [github, repo, file, branch])
 
   // Handle escape key to close
   useEffect(() => {

@@ -15,6 +15,17 @@ export interface GitHubRepo {
   default_branch: string
   language: string
   updated_at: string
+  pushed_at: string
+}
+
+export interface GitHubBranch {
+  name: string
+  commit: {
+    sha: string
+    url: string
+  }
+  protected: boolean
+  lastCommitDate?: string
 }
 
 export interface GitHubFileContent {
@@ -76,17 +87,92 @@ export class GitHubAPI {
     return this.request<GitHubRepo>(`/repos/${owner}/${repo}`)
   }
 
-  // Get complete repository file tree using Git Trees API
-  async getRepositoryTree(owner: string, repo: string): Promise<GitHubFile[]> {
+  // Get repository branches sorted by most recent activity
+  async getRepositoryBranches(owner: string, repo: string): Promise<GitHubBranch[]> {
     try {
-      // First get the default branch to find the tree SHA
+      // Get all branches with commit details
+      const branches = await this.request<Array<{
+        name: string
+        commit: {
+          sha: string
+          url: string
+        }
+        protected: boolean
+      }>>(`/repos/${owner}/${repo}/branches?per_page=100`)
+      
+      // Get the repository info to identify the default branch
       const repoInfo = await this.getRepository(owner, repo)
       const defaultBranch = repoInfo.default_branch
+      
+      // Fetch commit details for each branch to get the actual commit date
+      const branchesWithDates = await Promise.all(
+        branches.map(async (branch) => {
+          try {
+            // Fetch the commit details for this branch's HEAD
+            const commit = await this.request<{
+              commit: {
+                author: {
+                  date: string
+                }
+                committer: {
+                  date: string
+                }
+              }
+            }>(`/repos/${owner}/${repo}/commits/${branch.commit.sha}`)
+            
+            return {
+              ...branch,
+              lastCommitDate: commit.commit.author.date
+            } as GitHubBranch
+          } catch (error) {
+            console.warn(`Failed to fetch commit date for branch ${branch.name}:`, error)
+            return {
+              ...branch,
+              lastCommitDate: undefined
+            } as GitHubBranch
+          }
+        })
+      )
+      
+      // Sort branches by most recent commit date
+      return branchesWithDates.sort((a, b) => {
+        // Default branch always comes first
+        if (a.name === defaultBranch) return -1
+        if (b.name === defaultBranch) return 1
+        
+        // Get commit dates for comparison
+        const dateA = a.lastCommitDate
+        const dateB = b.lastCommitDate
+        
+        // If we have dates for both, sort by most recent
+        if (dateA && dateB) {
+          return new Date(dateB).getTime() - new Date(dateA).getTime()
+        }
+        
+        // If only one has a date, prioritize it
+        if (dateA && !dateB) return -1
+        if (!dateA && dateB) return 1
+        
+        // If neither has a date, sort alphabetically
+        return a.name.localeCompare(b.name)
+      })
+    } catch (error) {
+      console.error('Failed to fetch repository branches:', error)
+      return []
+    }
+  }
+
+  // Get complete repository file tree using Git Trees API
+  async getRepositoryTree(owner: string, repo: string, branch?: string): Promise<GitHubFile[]> {
+    try {
+      // Get the repository info to find the default branch if none specified
+      const repoInfo = await this.getRepository(owner, repo)
+      const targetBranch = branch || repoInfo.default_branch
 
       // Get the branch reference
       const branchRef = await this.request<{
         object: { sha: string }
-      }>(`/repos/${owner}/${repo}/git/refs/heads/${defaultBranch}`)
+      }>(`/repos/${owner}/${repo}/git/refs/heads/${targetBranch}`)
 
       // Get the tree recursively
       const tree = await this.request<{
@@ -107,7 +193,7 @@ export class GitHubAPI {
           type: 'file' as const,
           size: item.size,
           sha: item.sha,
-          download_url: `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/${item.path}`
+          download_url: `https://raw.githubusercontent.com/${owner}/${repo}/${targetBranch}/${item.path}`
         }))
     } catch (error) {
       console.error('Error fetching repository tree:', error)
@@ -176,7 +262,14 @@ export class GitHubAPI {
       page++
     }
     
-    return allRepos
+    // Sort all repositories by most recently pushed to (actual activity)
+    // This is necessary because pagination breaks the sort order across pages
+    return allRepos.sort((a, b) => {
+      // Use pushed_at for actual repository activity, fallback to updated_at
+      const dateA = new Date(a.pushed_at || a.updated_at).getTime()
+      const dateB = new Date(b.pushed_at || b.updated_at).getTime()
+      return dateB - dateA // Most recent first
+    })
   }
 
   // Search repository files using GitHub's search API

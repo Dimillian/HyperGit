@@ -3,6 +3,9 @@
 ## 🎉 Recent Accomplishments
 
 ### Major Features Added (Latest Session)
+- ✅ **Branch/Tag Switching**: Complete branch switching with syntax `@repo:branch/file` and autocomplete
+- ✅ **Branch Autocomplete**: Type `:` after repo name to see and select available branches
+- ✅ **Branch-Aware Caching**: Separate file tree cache for each branch
 - ✅ **Folder Browsing**: Complete repository folder navigation with breadcrumb support
 - ✅ **Component Refactoring**: Reduced SearchBar complexity from 538 to 307 lines (~43% reduction)
 - ✅ **Modular Architecture**: Extracted hooks, components, and utilities for better maintainability
@@ -12,11 +15,12 @@
 
 ### Code Quality Improvements
 - ✅ Created reusable hooks: `useDropdownVisibility`, `useKeyboardNavigation`
-- ✅ Extracted UI components: `RepositoryDropdown`, `FileDropdown`, `CodeSnippetShare`
-- ✅ Added utility functions: `folderUtils.ts` with parsing and navigation helpers
-- ✅ Enhanced FileViewer with line selection and sharing capabilities
-- ✅ Improved TypeScript types and interfaces
+- ✅ Extracted UI components: `RepositoryDropdown`, `FileDropdown`, `BranchDropdown`, `CodeSnippetShare`
+- ✅ Added utility functions: `folderUtils.ts` with branch-aware parsing and navigation helpers
+- ✅ Enhanced FileViewer with line selection, sharing capabilities, and branch-aware file loading
+- ✅ Improved TypeScript types and interfaces (added GitHubBranch type)
 - ✅ Better separation of concerns and maintainability
+- ✅ Branch-specific API integration in GitHubAPI class
 
 ## 🚀 High Priority - Core Features
 
@@ -88,7 +92,8 @@
 ### Power User Features
 - [ ] Multiple GitHub account support
 - [ ] Organization repository access
-- [ ] Branch/tag switching
+- [x] Branch/tag switching (syntax: @repo-name:branch-name/file-path)
+- [x] Branch autocomplete when typing : after repository name
 - [ ] File editing capabilities (if write permissions)
 - [ ] Bulk file operations
 - [ ] Export search results
