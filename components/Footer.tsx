@@ -35,6 +35,15 @@ export default function Footer() {
             >
               View Source
             </a>
+            <span>•</span>
+            <a 
+              href="https://github.com/Dimillian/HyperGit/blob/main/PRIVACY.md" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[var(--neon-purple)] hover:text-[var(--neon-purple-bright)] transition-colors duration-200"
+            >
+              Privacy Policy
+            </a>
           </div>
         </div>
       </div>
