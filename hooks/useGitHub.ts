@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GitHubAPI, GitHubRepo } from '@/lib/github/api'
+import { repositoryCache } from '@/lib/github/repositoryCache'
 
 export function useGitHub() {
   const [github, setGitHub] = useState<GitHubAPI | null>(null)
@@ -14,9 +15,23 @@ export function useGitHub() {
       const token = localStorage.getItem('github_token')
       if (token) {
         setGitHub(new GitHubAPI(token))
-        await loadRepositories(token)
+        
+        // Try to load from cache first
+        const cachedRepos = repositoryCache.get(token)
+        if (cachedRepos) {
+          setRepositories(cachedRepos)
+          setIsInitializing(false)
+          
+          // Load fresh data in background
+          loadRepositories(token, true)
+        } else {
+          // No cache, load normally
+          await loadRepositories(token)
+          setIsInitializing(false)
+        }
+      } else {
+        setIsInitializing(false)
       }
-      setIsInitializing(false)
     }
 
     initializeAuth()
@@ -36,20 +51,31 @@ export function useGitHub() {
     return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
 
-  const loadRepositories = async (token: string) => {
-    setLoading(true)
-    setError(null)
-    setLoadingProgress({ loaded: 0, total: 0 })
+  const loadRepositories = async (token: string, isBackground = false) => {
+    if (!isBackground) {
+      setLoading(true)
+      setError(null)
+      setLoadingProgress({ loaded: 0, total: 0 })
+    }
+    
     try {
       const api = new GitHubAPI(token)
       const repos = await api.getUserRepositories((loaded, total) => {
-        setLoadingProgress({ loaded, total })
+        if (!isBackground) {
+          setLoadingProgress({ loaded, total })
+        }
       })
+      
       setRepositories(repos)
+      
+      // Cache the repositories
+      repositoryCache.set(repos, token)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load repositories')
     } finally {
-      setLoading(false)
+      if (!isBackground) {
+        setLoading(false)
+      }
     }
   }
 
@@ -61,6 +87,7 @@ export function useGitHub() {
 
   const clearToken = () => {
     localStorage.removeItem('github_token')
+    repositoryCache.clear()
     setGitHub(null)
     setRepositories([])
   }
