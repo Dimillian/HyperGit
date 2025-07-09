@@ -3,7 +3,7 @@ import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://hypergit.dev'),
+  metadataBase: new URL('https://hypergit.app'),
   title: 'HyperGit - Lightning Fast GitHub File Search',
   description: 'Search across all your GitHub repositories with lightning speed. Find any file instantly with an intuitive @-mention syntax.',
   authors: [{ name: 'Dimillian', url: 'https://dimillian.app' }],
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'HyperGit - Lightning Fast GitHub File Search',
     description: 'Search across all your GitHub repositories with lightning speed. Find any file instantly with an intuitive @-mention syntax.',
-    url: 'https://hypergit.dev',
+    url: 'https://hypergit.app',
     siteName: 'HyperGit',
     images: [
       {
