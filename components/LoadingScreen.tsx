@@ -10,7 +10,9 @@ interface LoadingScreenProps {
 export default function LoadingScreen({ loadingProgress }: LoadingScreenProps) {
   // When total is 0, we don't know the total, so show indeterminate progress
   const hasTotal = loadingProgress && loadingProgress.total > 0
-  const progress = hasTotal
+  // Calculate progress but it's not currently used in rendering
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  hasTotal && loadingProgress
     ? (loadingProgress.loaded / loadingProgress.total) * 100 
     : 0
     

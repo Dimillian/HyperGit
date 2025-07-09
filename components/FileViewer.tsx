@@ -23,7 +23,7 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [selectedLines, setSelectedLines] = useState<{ start: number; end: number } | null>(null)
-  const [isSelecting, setIsSelecting] = useState(false)
+  const [,] = useState(false) // setIsSelecting not used currently
   const [showShareModal, setShowShareModal] = useState(false)
   const [snippetSaved, setSnippetSaved] = useState(false)
   const codeRef = useRef<HTMLDivElement>(null)

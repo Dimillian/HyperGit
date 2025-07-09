@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useGitHub } from '@/hooks/useGitHub'
-import { Github, Key } from 'lucide-react'
+import { Github } from 'lucide-react'
 
 export default function AuthPrompt() {
   const [token, setToken] = useState('')
@@ -88,7 +88,7 @@ export default function AuthPrompt() {
               >
                 github.com/settings/tokens
               </a>
-              {' '}with 'repo' scope
+              {' '}with &apos;repo&apos; scope
             </p>
           </div>
 

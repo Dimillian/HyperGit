@@ -28,7 +28,7 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
 
       // Force a reflow to ensure all content is rendered
       cardElement.style.display = 'block'
-      cardElement.offsetHeight // Force reflow
+      void cardElement.offsetHeight // Force reflow
       
       // Longer delay to ensure fonts and content are fully rendered
       await new Promise(resolve => setTimeout(resolve, 300))

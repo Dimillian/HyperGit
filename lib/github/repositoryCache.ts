@@ -96,7 +96,7 @@ class RepositoryCache {
       if (data.token !== token) return null
 
       return Date.now() - data.timestamp
-    } catch (error) {
+    } catch {
       return null
     }
   }

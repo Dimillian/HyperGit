@@ -74,9 +74,9 @@ export class FileTreeCache {
         
         // Clean up old localStorage entries
         this.cleanupLocalStorage()
-      } catch (e) {
+      } catch {
         // Ignore localStorage errors (quota exceeded, etc)
-        console.warn('Failed to save to localStorage:', e)
+        console.warn('Failed to save to localStorage')
       }
     }
   }
@@ -99,7 +99,7 @@ export class FileTreeCache {
       }
 
       return data.files
-    } catch (e) {
+    } catch {
       return null
     }
   }

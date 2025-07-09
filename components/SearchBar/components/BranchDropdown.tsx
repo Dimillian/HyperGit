@@ -6,7 +6,6 @@ interface BranchDropdownProps {
   isLoadingBranches: boolean
   filteredBranches: GitHubBranch[]
   selectedIndex: number
-  beforeAt: string
   onBranchSelect: (branch: string) => void
 }
 
@@ -37,7 +36,6 @@ export const BranchDropdown = ({
   isLoadingBranches,
   filteredBranches,
   selectedIndex,
-  beforeAt,
   onBranchSelect
 }: BranchDropdownProps) => {
   return (

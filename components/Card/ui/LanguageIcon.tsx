@@ -12,7 +12,7 @@ interface LanguageIconProps {
 
 export function LanguageIcon({ language, filename, size = 'md', className = '' }: LanguageIconProps) {
   const getIconPath = (iconName: string): string | null => {
-    const icon = (SimpleIcons as any)[iconName]
+    const icon = (SimpleIcons as unknown as Record<string, { path: string }>)[iconName]
     return icon?.path || null
   }
 

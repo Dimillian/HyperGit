@@ -265,7 +265,7 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
       const shouldShowDropdown = isEmpty || hasAtSymbol || mode === 'files' || mode === 'branches'
       setIsDropdownOpen(shouldShowDropdown)
     }
-  }, [query, isAuthenticated, mode])
+  }, [query, isAuthenticated, mode, inputRef])
 
   // Detect when to show branch autocomplete
   useEffect(() => {
@@ -373,7 +373,6 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
                 isLoadingBranches={isLoadingBranches}
                 filteredBranches={filteredBranches}
                 selectedIndex={selectedIndex}
-                beforeAt={beforeAt}
                 onBranchSelect={selectBranch}
               />
             ) : (

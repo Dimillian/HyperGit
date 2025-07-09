@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useGitHub } from '@/hooks/useGitHub'
 import { GitHubRepo, GitHubFile } from '@/lib/github/api'
 import { RecentFilesManager } from '@/lib/recentFiles'
@@ -10,7 +10,7 @@ import AuthPrompt from '@/components/AuthPrompt'
 import { RecentFiles, RecentSnippets } from '@/components/Card'
 import LoadingScreen from '@/components/LoadingScreen'
 import Footer from '@/components/Footer'
-import { LogOut, GitBranch, Clock, File } from 'lucide-react'
+import { LogOut, GitBranch } from 'lucide-react'
 import { TimePill, ShineCard, LanguageIcon } from '@/components/Card'
 
 export default function Home() {
@@ -34,7 +34,7 @@ export default function Home() {
     setRecentSnippetsKey(prev => prev + 1)
   }
 
-  const handleRepoSelect = (repo: GitHubRepo) => {
+  const handleRepoSelect = () => {
     // This will be handled by the SearchBar component
   }
 

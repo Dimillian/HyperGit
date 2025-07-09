@@ -1,6 +1,6 @@
-import { NextRequest } from 'next/server'
+// NextRequest import removed as it's not used
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const clientId = process.env.GITHUB_CLIENT_ID
   
   if (!clientId) {

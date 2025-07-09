@@ -62,9 +62,9 @@ export default function RecentFiles({ onFileSelect }: RecentFilesProps) {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {recentFiles.map((recentFile, index) => {
+        {recentFiles.map((recentFile) => {
           const { file, repo, branch, timestamp } = recentFile
-          const language = getFileLanguage(file.name)
+          getFileLanguage(file.name) // language computed but not used
           const extension = getFileExtension(file.name)
           
           const actions = [

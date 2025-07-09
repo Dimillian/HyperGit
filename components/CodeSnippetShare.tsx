@@ -37,7 +37,7 @@ export default function CodeSnippetShare({
       
       // Force a reflow to ensure all content is rendered
       element.style.display = 'block'
-      element.offsetHeight // Force reflow
+      void element.offsetHeight // Force reflow
       
       // Longer delay to ensure fonts and content are fully rendered
       await new Promise(resolve => setTimeout(resolve, 300))
@@ -58,7 +58,7 @@ export default function CodeSnippetShare({
         y: 0,
         scrollX: 0,
         scrollY: 0
-      } as any)
+      } as Parameters<typeof html2canvas>[1])
 
       // Convert to blob and download
       canvas.toBlob((blob) => {
