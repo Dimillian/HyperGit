@@ -2,6 +2,8 @@
 
 > Lightning fast GitHub file search and browser with a sleek dark theme
 
+![HyperGit Interface](gitgit.png)
+
 HyperGit is a beautiful, cyberpunk-styled web frontend that lets you instantly search and view files across all your GitHub repositories. Built for developers who need to quickly find and reference code with style.
 
 ## ✨ Features
