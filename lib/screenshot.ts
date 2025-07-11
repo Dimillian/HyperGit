@@ -24,7 +24,8 @@ export async function generateScreenshot(
     allowTaint: true,
     logging: false,
     width: element.offsetWidth,
-    height: computedHeight + 15 // Buffer for text descenders and padding
+    height: computedHeight + 15, // Buffer for text descenders and padding
+    background: '#0f0f0f' // Dark background to match card
   })
 }
 
