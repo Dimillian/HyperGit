@@ -15,7 +15,7 @@ export async function generateScreenshot(
   // Longer delay to ensure fonts and content are fully rendered
   await new Promise(resolve => setTimeout(resolve, 300))
   
-  // Get accurate dimensions including any overflow
+  // Get accurate dimensions - add minimal buffer for text descenders
   const rect = element.getBoundingClientRect()
   const computedHeight = Math.max(element.offsetHeight, element.scrollHeight, rect.height)
   
@@ -24,7 +24,7 @@ export async function generateScreenshot(
     allowTaint: true,
     logging: false,
     width: element.offsetWidth,
-    height: computedHeight + 20 // Add extra 30px for text descenders
+    height: computedHeight + 15 // Buffer for text descenders and padding
   })
 }
 
