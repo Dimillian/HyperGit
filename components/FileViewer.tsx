@@ -6,8 +6,8 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { GitHubRepo, GitHubFile, getFileLanguage } from '@/lib/github/api'
 import { useGitHub } from '@/hooks/useGitHub'
 import { File, ExternalLink, Copy, CheckCircle, Camera, BookmarkPlus } from 'lucide-react'
-import CodeSnippetShare from './CodeSnippetShare'
-import { RecentSnippetsManager } from '@/lib/recentSnippets'
+import SnippetViewer from './SnippetViewer'
+import { RecentSnippetsManager, RecentSnippet } from '@/lib/recentSnippets'
 
 interface FileViewerProps {
   repo: GitHubRepo
@@ -24,7 +24,7 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
   const [copied, setCopied] = useState(false)
   const [selectedLines, setSelectedLines] = useState<{ start: number; end: number } | null>(null)
   const [,] = useState(false) // setIsSelecting not used currently
-  const [showShareModal, setShowShareModal] = useState(false)
+  const [currentSnippet, setCurrentSnippet] = useState<RecentSnippet | null>(null)
   const [snippetSaved, setSnippetSaved] = useState(false)
   const codeRef = useRef<HTMLDivElement>(null)
   const { github } = useGitHub()
@@ -204,9 +204,39 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
   }
 
   const handleShareClick = () => {
-    if (selectedLines) {
-      setShowShareModal(true)
+    if (!selectedLines) return
+    
+    // Create a snippet and show the SnippetViewer
+    const snippetCode = getSelectedCode()
+    const language = getFileLanguage(file.name)
+    const title = `${repo.name}/${file.name} (L${selectedLines.start}-${selectedLines.end})`
+    
+    // Add to recent snippets
+    RecentSnippetsManager.addRecentSnippet(
+      repo,
+      file,
+      branch || repo.default_branch,
+      selectedLines,
+      snippetCode,
+      language,
+      title
+    )
+    
+    // Create snippet object for SnippetViewer
+    const snippet: RecentSnippet = {
+      id: `${repo.full_name}-${file.path}-${branch || repo.default_branch}-${selectedLines.start}-${selectedLines.end}-${Date.now()}`,
+      repo,
+      file,
+      branch: branch || repo.default_branch,
+      selectedLines,
+      code: snippetCode,
+      language,
+      title,
+      timestamp: Date.now()
     }
+    
+    setCurrentSnippet(snippet)
+    onSnippetSaved?.()
   }
 
   const saveSnippet = () => {
@@ -398,15 +428,11 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
         </div>
       </div>
 
-      {/* Share Modal */}
-      {showShareModal && selectedLines && (
-        <CodeSnippetShare
-          repo={repo}
-          file={file}
-          selectedCode={getSelectedCode()}
-          selectedLines={selectedLines}
-          language={language}
-          onClose={() => setShowShareModal(false)}
+      {/* Snippet Viewer */}
+      {currentSnippet && (
+        <SnippetViewer
+          snippet={currentSnippet}
+          onClose={() => setCurrentSnippet(null)}
         />
       )}
     </div>

@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { RecentSnippet } from '@/lib/recentSnippets'
 import { Camera, Share2, Copy, ExternalLink, CheckCircle } from 'lucide-react'
-import html2canvas from 'html2canvas'
+import { downloadScreenshot, copyScreenshotToClipboard } from '@/lib/screenshot'
 
 interface SnippetViewerProps {
   snippet: RecentSnippet
@@ -14,6 +14,7 @@ interface SnippetViewerProps {
 
 export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) {
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isCopying, setIsCopying] = useState(false)
   const [copied, setCopied] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
@@ -22,52 +23,31 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
 
     setIsGenerating(true)
     try {
-      // Capture the inner card element
       const cardElement = cardRef.current.querySelector('.screenshot-card') as HTMLElement
       if (!cardElement) return
 
-      // Force a reflow to ensure all content is rendered
-      cardElement.style.display = 'block'
-      void cardElement.offsetHeight // Force reflow
-      
-      // Longer delay to ensure fonts and content are fully rendered
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-      // Get accurate dimensions including any overflow
-      const rect = cardElement.getBoundingClientRect()
-      const computedHeight = Math.max(cardElement.offsetHeight, cardElement.scrollHeight, rect.height)
-      
-      const canvas = await html2canvas(cardElement, {
-        backgroundColor: 'transparent',
-        scale: 2, // High DPI for better quality
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        width: cardElement.offsetWidth,
-        height: computedHeight + 30, // Add extra 30px for text descenders
-        x: 0,
-        y: 0,
-        scrollX: 0,
-        scrollY: 0
-      })
-
-      // Convert to blob and download
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `${snippet.repo.name}-${snippet.file.name}-L${snippet.selectedLines.start}-${snippet.selectedLines.end}.png`
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          URL.revokeObjectURL(url)
-        }
-      }, 'image/png')
+      const filename = `${snippet.repo.name}-${snippet.file.name}-L${snippet.selectedLines.start}-${snippet.selectedLines.end}.png`
+      await downloadScreenshot(cardElement, filename)
     } catch (error) {
       console.error('Error generating screenshot:', error)
     } finally {
       setIsGenerating(false)
+    }
+  }
+
+  const copyScreenshot = async () => {
+    if (!cardRef.current) return
+
+    setIsCopying(true)
+    try {
+      const cardElement = cardRef.current.querySelector('.screenshot-card') as HTMLElement
+      if (!cardElement) return
+
+      await copyScreenshotToClipboard(cardElement)
+    } catch (error) {
+      console.error('Error copying screenshot:', error)
+    } finally {
+      setIsCopying(false)
     }
   }
 
@@ -149,6 +129,24 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
                   <>
                     <Camera className="w-5 h-5" />
                     <span className="sm:inline">Screenshot</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={copyScreenshot}
+                disabled={isCopying}
+                className="flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] text-sm shiny-surface text-[var(--dark-text)] hover:bg-[var(--neon-purple)]/20 rounded-lg transition-all duration-200 border border-[var(--dark-border)] hover:border-[var(--neon-purple)]/50 disabled:opacity-50"
+              >
+                {isCopying ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                    <span className="sm:inline">Copying...</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-5 h-5" />
+                    <span className="sm:inline">Copy Screenshot</span>
                   </>
                 )}
               </button>
