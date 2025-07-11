@@ -192,13 +192,13 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
           >
             <div className="screenshot-card glass-effect rounded-xl border border-[var(--neon-purple)]/30 overflow-hidden">
               {/* Card Header */}
-              <div className="px-6 py-4 border-b border-[var(--dark-border)] bg-gradient-to-r from-[var(--dark-bg-secondary)] to-[var(--dark-bg-tertiary)]">
+              <div className="px-6 py-4 border-b border-[#1a1a1a] bg-gradient-to-r from-[#0a0a0a] to-[#111111]">
                 <div className="text-left">
-                  <h3 className="font-semibold text-[var(--dark-text)] text-lg text-left">{snippet.title}</h3>
-                  <p className="text-sm text-[var(--dark-text-secondary)] mt-1 text-left">
+                  <h3 className="font-semibold text-[#e5e5e5] text-lg text-left">{snippet.title}</h3>
+                  <p className="text-sm text-[#a3a3a3] mt-1 text-left">
                     {snippet.repo.full_name}
                     {snippet.branch && snippet.branch !== snippet.repo.default_branch && (
-                      <span className="text-[var(--neon-purple)] mx-1">:{snippet.branch}</span>
+                      <span className="text-[#a855f7] mx-1">:{snippet.branch}</span>
                     )}
                     /{snippet.file.path} {lineRange}
                   </p>
@@ -223,15 +223,15 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
               </div>
 
               {/* Card Footer */}
-              <div className="px-6 py-4 border-t border-[var(--dark-border)] bg-gradient-to-r from-[var(--dark-bg-secondary)] to-[var(--dark-bg-tertiary)]">
+              <div className="px-6 py-4 border-t border-[#1a1a1a] bg-gradient-to-r from-[#0a0a0a] to-[#111111]">
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-[var(--dark-text-secondary)]">Language:</span>
-                    <span className="text-[var(--neon-purple)] font-medium">{snippet.language}</span>
+                    <span className="text-[#a3a3a3]">Language:</span>
+                    <span className="text-[#a855f7] font-medium">{snippet.language}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[var(--dark-text-secondary)]">Lines:</span>
-                    <span className="text-[var(--neon-purple)] font-medium">
+                    <span className="text-[#a3a3a3]">Lines:</span>
+                    <span className="text-[#a855f7] font-medium">
                       {snippet.selectedLines.end - snippet.selectedLines.start + 1}
                     </span>
                   </div>

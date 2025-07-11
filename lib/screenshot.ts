@@ -24,7 +24,7 @@ export async function generateScreenshot(
     allowTaint: true,
     logging: false,
     width: element.offsetWidth,
-    height: computedHeight + 30 // Add extra 30px for text descenders
+    height: computedHeight + 20 // Add extra 30px for text descenders
   })
 }
 
