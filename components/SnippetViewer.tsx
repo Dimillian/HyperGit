@@ -190,7 +190,7 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
               margin: '0 auto' // Center the content
             }}
           >
-            <div className="screenshot-card glass-effect rounded-xl border border-[var(--neon-purple)]/30 overflow-hidden">
+            <div className="screenshot-card border border-[#a855f7]/30 overflow-hidden bg-[#0f0f0f]">
               {/* Card Header */}
               <div className="px-6 py-4 border-b border-[#1a1a1a] bg-gradient-to-r from-[#0a0a0a] to-[#111111]">
                 <div className="text-left">
