@@ -124,7 +124,9 @@ export default function CodeSnippetShare({
               ref={cardRef}
               className="bg-transparent"
               style={{ 
-                width: '832px', // 800px + 32px padding
+                width: 'fit-content',
+                maxWidth: '1200px', // Reasonable max width
+                minWidth: '600px', // Minimum width for readability
                 padding: '16px',
                 margin: '20px 0' // Margin to prevent boundary issues
               }}
@@ -145,6 +147,7 @@ export default function CodeSnippetShare({
                   language={language}
                   style={oneDark}
                   showLineNumbers
+                  wrapLines
                   startingLineNumber={selectedLines.start}
                 >
                   {selectedCode}

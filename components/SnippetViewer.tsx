@@ -38,9 +38,17 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
       const computedHeight = Math.max(cardElement.offsetHeight, cardElement.scrollHeight, rect.height)
       
       const canvas = await html2canvas(cardElement, {
-        height: computedHeight + 20, // Extra space for text descenders
+        backgroundColor: 'transparent',
+        scale: 2, // High DPI for better quality
         useCORS: true,
         allowTaint: true,
+        logging: false,
+        width: cardElement.offsetWidth,
+        height: computedHeight + 30, // Add extra 30px for text descenders
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0
       })
 
       // Convert to blob and download
@@ -175,7 +183,15 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
 
         {/* Content */}
         <div className="flex-1 overflow-auto">
-          <div ref={cardRef}>
+          <div 
+            ref={cardRef}
+            style={{ 
+              width: 'fit-content',
+              maxWidth: '1200px', // Reasonable max width
+              minWidth: '600px', // Minimum width for readability
+              margin: '0 auto' // Center the content
+            }}
+          >
             <div className="screenshot-card glass-effect rounded-xl border border-[var(--neon-purple)]/30 overflow-hidden">
               {/* Card Header */}
               <div className="px-6 py-4 border-b border-[var(--dark-border)] bg-gradient-to-r from-[var(--dark-bg-secondary)] to-[var(--dark-bg-tertiary)]">
