@@ -101,11 +101,24 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
       const lineNumberSpans = Array.from(codeElement.querySelectorAll('span[data-line-number]'))
       
       if (lineNumberSpans.length === 0) {
-        // Fallback: find spans that contain line numbers
+        // Improved fallback: look for line number spans more specifically
         const allSpans = Array.from(codeElement.querySelectorAll('span'))
         const lineSpans = allSpans.filter(span => {
           const text = span.textContent?.trim() || ''
-          return /^\d+$/.test(text) && parseInt(text) > 0
+          // Must be just digits
+          if (!/^\d+$/.test(text) || parseInt(text) === 0) return false
+          
+          // Additional check: line number spans are typically the first child of their parent
+          // and not deeply nested in syntax highlighting structure
+          const parent = span.parentElement
+          if (!parent) return false
+          
+          // Check if this span is likely a line number by its position and context
+          const isFirstChild = parent.firstElementChild === span
+          const hasCodeSibling = parent.children.length > 1
+          
+          // Line numbers are usually first child and have code siblings
+          return isFirstChild && hasCodeSibling
         })
         
         if (lineSpans.length === 0) {
@@ -117,14 +130,35 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
         let startLine = null
         let endLine = null
         
+        // More precise approach: check if selection intersects with each line
         for (const span of lineSpans) {
           const lineNum = parseInt(span.textContent || '0')
           if (lineNum === 0) continue
           
-          // Check if this line span is within the selection
-          if (selection.containsNode(span, true)) {
-            if (startLine === null || lineNum < startLine) startLine = lineNum
-            if (endLine === null || lineNum > endLine) endLine = lineNum
+          // Get the entire line container (parent of the line number span)
+          const lineContainer = span.parentElement
+          if (!lineContainer) continue
+          
+          // Check if the selection range intersects with this line
+          const lineRange = document.createRange()
+          lineRange.selectNodeContents(lineContainer)
+          
+          try {
+            // Check if the selection range intersects with this line range
+            const selectionRange = selection.getRangeAt(0)
+            const intersects = selectionRange.compareBoundaryPoints(Range.END_TO_START, lineRange) <= 0 &&
+                              selectionRange.compareBoundaryPoints(Range.START_TO_END, lineRange) >= 0
+            
+            if (intersects) {
+              if (startLine === null || lineNum < startLine) startLine = lineNum
+              if (endLine === null || lineNum > endLine) endLine = lineNum
+            }
+          } catch (e) {
+            // Fallback to containsNode if range comparison fails
+            if (selection.containsNode(lineContainer, true)) {
+              if (startLine === null || lineNum < startLine) startLine = lineNum
+              if (endLine === null || lineNum > endLine) endLine = lineNum
+            }
           }
         }
         
@@ -164,12 +198,10 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
             if (current.nodeType === Node.ELEMENT_NODE) {
               const element = current as Element
               // Check if this element or its children contain a line number
-              const lineNumSpan = element.querySelector?.('span[data-line-number]') || 
-                                 Array.from(element.querySelectorAll?.('span') || [])
-                                   .find(s => /^\d+$/.test(s.textContent?.trim() || ''))
+              const lineNumSpan = element.querySelector?.('span[data-line-number]')
               
               if (lineNumSpan) {
-                const num = lineNumSpan.getAttribute?.('data-line-number') || lineNumSpan.textContent?.trim()
+                const num = lineNumSpan.getAttribute?.('data-line-number')
                 if (num && /^\d+$/.test(num)) {
                   return parseInt(num)
                 }
