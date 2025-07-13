@@ -16,6 +16,7 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
   const [isGenerating, setIsGenerating] = useState(false)
   const [isCopying, setIsCopying] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [screenshotCopied, setScreenshotCopied] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const generateScreenshot = async () => {
@@ -44,6 +45,8 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
       if (!cardElement) return
 
       await copyScreenshotToClipboard(cardElement)
+      setScreenshotCopied(true)
+      setTimeout(() => setScreenshotCopied(false), 2000)
     } catch (error) {
       console.error('Error copying screenshot:', error)
     } finally {
@@ -142,6 +145,11 @@ export default function SnippetViewer({ snippet, onClose }: SnippetViewerProps) 
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
                     <span className="sm:inline">Copying...</span>
+                  </>
+                ) : screenshotCopied ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span className="sm:inline">Screenshot Copied!</span>
                   </>
                 ) : (
                   <>
