@@ -82,7 +82,10 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
     return lines.slice(selectedLines.start - 1, selectedLines.end).join('\n')
   }
 
-  const handleLineSelection = () => {
+  const handleLineSelection = (e: React.MouseEvent) => {
+    // Prevent event bubbling to avoid modal dismissal
+    e.stopPropagation()
+    
     if (!codeRef.current) return
 
     const selection = window.getSelection()
@@ -299,8 +302,10 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
 
   return (
     <div 
+      data-modal="file-viewer"
       className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      onClick={(e) => {
+      onMouseDown={(e) => {
+        // Only close if clicking directly on the backdrop (not on the modal content)
         if (e.target === e.currentTarget) {
           onClose()
           // Reset search bar when closing via backdrop click
@@ -445,6 +450,7 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
                 ref={codeRef}
                 onMouseUp={handleLineSelection}
                 className="select-text"
+                onClick={(e) => e.stopPropagation()}
               >
                 <SyntaxHighlighter
                   language={language}
