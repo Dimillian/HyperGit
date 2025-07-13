@@ -153,7 +153,7 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
               if (startLine === null || lineNum < startLine) startLine = lineNum
               if (endLine === null || lineNum > endLine) endLine = lineNum
             }
-          } catch (e) {
+          } catch {
             // Fallback to containsNode if range comparison fails
             if (selection.containsNode(lineContainer, true)) {
               if (startLine === null || lineNum < startLine) startLine = lineNum
