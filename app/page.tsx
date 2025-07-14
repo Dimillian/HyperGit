@@ -22,10 +22,10 @@ export default function Home() {
   const handleFileSelect = (repo: GitHubRepo, file: GitHubFile, branch?: string) => {
     // Track the file visit with branch information
     RecentFilesManager.addRecentFile(repo, file, branch || repo.default_branch)
-    
+
     // Force re-render of recent files component
     setRecentFilesKey(prev => prev + 1)
-    
+
     setSelectedFile({ repo, file, branch })
   }
 
@@ -52,7 +52,7 @@ export default function Home() {
         <div className="flex-1 flex items-center justify-center p-4">
           <AuthPrompt />
         </div>
-        
+
         <Footer />
       </div>
     )
@@ -61,23 +61,23 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="shiny-surface border-b border-[var(--dark-border)]">
+      <header>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 text-[var(--neon-purple)] flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" className="w-full h-full">
                   {/* GitHub Icon - clean flat version */}
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" 
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
                         fill="#a855f7"/>
                   {/* Lightning Bolt - clean and flat */}
-                  <path d="M10 0l-3 7h2l-2 9 4-8h-2l3-8z" 
+                  <path d="M10 0l-3 7h2l-2 9 4-8h-2l3-8z"
                         fill="#fbbf24"/>
                 </svg>
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-[var(--dark-text)] via-[var(--neon-purple-bright)] to-[var(--dark-text)] bg-clip-text text-transparent">HyperGit</h1>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <span className="text-sm text-[var(--dark-text-secondary)]">
                 {repositories.length} repositories
@@ -96,7 +96,7 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="text-center space-y-8">
             <div className="space-y-2">
               <h2 className="text-4xl font-bold bg-gradient-to-r from-[var(--dark-text)] via-[var(--neon-purple-bright)] to-[var(--dark-text)] bg-clip-text text-transparent">
@@ -107,8 +107,8 @@ export default function Home() {
               </p>
             </div>
 
-            <SearchBar 
-              onFileSelect={handleFileSelect} 
+            <SearchBar
+              onFileSelect={handleFileSelect}
               onRepoSelect={handleRepoSelect}
               ref={(ref) => { if (ref) window.searchBarRef = ref }}
             />
@@ -117,14 +117,14 @@ export default function Home() {
               <p className="text-[var(--dark-text-secondary)] mb-8">
                 Quick tip: Type <code className="bg-[var(--dark-bg-tertiary)] text-[var(--neon-purple)] px-2 py-1 rounded text-sm border border-[var(--neon-purple)]/30">@repo-name/filename</code> to search
               </p>
-              
+
               {/* Recent Repositories Section */}
               <div className="max-w-4xl mx-auto space-y-4">
                 <div className="flex items-center gap-2">
                   <GitBranch className="w-5 h-5 text-[var(--neon-purple)]" />
                   <h3 className="text-lg font-semibold text-[var(--dark-text)]">Recent Repositories</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loading ? (
                   // Shimmer loading cards
