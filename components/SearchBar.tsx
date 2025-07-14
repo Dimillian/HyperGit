@@ -17,7 +17,7 @@ interface SearchBarProps {
   onRepoSelect?: (repo: GitHubRepo) => void
 }
 
-const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => void; resetSearchBar: () => void }, SearchBarProps>(
+const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => void; resetSearchBar: () => void; setSearchQuery: (query: string) => Promise<void>; inputRef: React.RefObject<HTMLInputElement | null> }, SearchBarProps>(
   function SearchBar({ onFileSelect, onRepoSelect }, ref) {
   const [query, setQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -192,10 +192,38 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
     selectBranch
   })
 
+  // Public method to set query programmatically
+  const setSearchQuery = async (newQuery: string) => {
+    setQuery(newQuery)
+    
+    // Parse the query to determine if we need to set up repository state
+    const { afterAt, repoName, branch, filePath } = parseQuery(newQuery)
+    
+    // If the query contains a repository name, automatically set up the state
+    if (afterAt && repoName) {
+      const matchingRepo = repositories.find(repo => 
+        repo.name.toLowerCase() === repoName.toLowerCase()
+      )
+      
+      if (matchingRepo) {
+        // Set up the repository state and load files
+        await selectRepository(matchingRepo, false, branch)
+        
+        // If there's a file path that ends with '/', it's a folder path
+        if (filePath && filePath.endsWith('/')) {
+          const folderPath = filePath.slice(0, -1) // Remove trailing slash
+          setCurrentPath(folderPath)
+        }
+      }
+    }
+  }
+
   // Expose methods to parent component
   useImperativeHandle(ref, () => ({
     selectRepositoryFromCard,
-    resetSearchBar
+    resetSearchBar,
+    setSearchQuery,
+    inputRef
   }))
 
   // Handle file search when in file mode
@@ -404,7 +432,6 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
               setCurrentPath={setCurrentPath}
               navigateToFolder={navigateToFolder}
               onFileSelect={onFileSelect}
-              setIsDropdownOpen={setIsDropdownOpen}
             />
           )}
         </div>

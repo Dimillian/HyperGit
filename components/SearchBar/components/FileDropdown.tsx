@@ -17,7 +17,6 @@ interface FileDropdownProps {
   setCurrentPath: (path: string) => void
   navigateToFolder: (path: string) => void
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
-  setIsDropdownOpen: (open: boolean) => void
 }
 
 export const FileDropdown = ({
@@ -35,8 +34,7 @@ export const FileDropdown = ({
   setQuery,
   setCurrentPath,
   navigateToFolder,
-  onFileSelect,
-  setIsDropdownOpen
+  onFileSelect
 }: FileDropdownProps) => {
   const isRootFileView = !afterAt.split('/').slice(1).join('/')
 
@@ -127,7 +125,7 @@ export const FileDropdown = ({
               } else {
                 const currentBranch = branch || selectedRepo.default_branch
                 onFileSelect(selectedRepo, file, currentBranch)
-                setIsDropdownOpen(false)
+                // Keep dropdown open so user can continue navigating
               }
             }}
           >

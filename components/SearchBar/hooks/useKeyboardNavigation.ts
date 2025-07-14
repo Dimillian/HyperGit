@@ -96,7 +96,7 @@ export const useKeyboardNavigation = ({
         } else {
           const currentBranch = branch || selectedRepo!.default_branch
           onFileSelect(selectedRepo!, selectedItem, currentBranch)
-          setIsDropdownOpen(false)
+          // Keep dropdown open so user can continue navigating
         }
       }
     }
@@ -123,6 +123,9 @@ export const useKeyboardNavigation = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isDropdownOpen) return
+      
+      // Don't handle keyboard events if a modal is open
+      if (document.querySelector('[data-modal]')) return
 
       switch (e.key) {
         case 'ArrowUp':

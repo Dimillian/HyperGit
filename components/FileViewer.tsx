@@ -54,10 +54,6 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
-        // Reset search bar when closing via escape
-        if (window.searchBarRef?.resetSearchBar) {
-          window.searchBarRef.resetSearchBar()
-        }
       }
     }
 
@@ -308,10 +304,6 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
         // Only close if clicking directly on the backdrop (not on the modal content)
         if (e.target === e.currentTarget) {
           onClose()
-          // Reset search bar when closing via backdrop click
-          if (window.searchBarRef?.resetSearchBar) {
-            window.searchBarRef.resetSearchBar()
-          }
         }
       }}
     >
@@ -324,13 +316,56 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
               <File className="w-6 h-6 text-[var(--neon-purple)]" />
               <div className="text-left">
                 <h2 className="font-semibold text-xl text-[var(--dark-text)] text-left">{file.name}</h2>
-                <p className="text-sm text-[var(--dark-text-secondary)] mt-1 text-left">
-                  {repo.full_name}
+                <div className="text-sm text-[var(--dark-text-secondary)] mt-1 text-left flex items-center flex-wrap">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // Set search to just the repo
+                      if (window.searchBarRef?.selectRepositoryFromCard) {
+                        window.searchBarRef.selectRepositoryFromCard(repo)
+                        onClose() // Close the file viewer
+                      }
+                    }}
+                    className="hover:text-[var(--neon-purple)] hover:underline transition-colors"
+                  >
+                    {repo.full_name}
+                  </button>
                   {branch && branch !== repo.default_branch && (
                     <span className="text-[var(--neon-purple)] mx-1">:{branch}</span>
                   )}
-                  /{file.path}
-                </p>
+                  <span className="mx-1">/</span>
+                  {file.path.split('/').map((part, index, parts) => {
+                    const isLast = index === parts.length - 1
+                    const isFile = isLast && file.type === 'file'
+                    
+                    return (
+                      <span key={index} className="inline-flex items-center">
+                        {!isFile ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Restore search to this folder
+                              if (window.searchBarRef) {
+                                // Set the query to navigate to this specific folder
+                                const searchQuery = `@${repo.name}${branch && branch !== repo.default_branch ? `:${branch}` : ''}/${parts.slice(0, index + 1).join('/')}/`
+                                window.searchBarRef.setSearchQuery(searchQuery).then(() => {
+                                  window.searchBarRef?.inputRef?.current?.focus()
+                                })
+                                onClose() // Close the file viewer
+                              }
+                            }}
+                            className="hover:text-[var(--neon-purple)] hover:underline transition-colors"
+                          >
+                            {part}
+                          </button>
+                        ) : (
+                          <span>{part}</span>
+                        )}
+                        {!isLast && <span className="mx-1">/</span>}
+                      </span>
+                    )
+                  })}
+                </div>
               </div>
             </div>
             
@@ -350,10 +385,6 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
               <button
                 onClick={() => {
                   onClose()
-                  // Reset search bar when closing via close button
-                  if (window.searchBarRef?.resetSearchBar) {
-                    window.searchBarRef.resetSearchBar()
-                  }
                 }}
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--dark-text-secondary)] hover:text-[var(--neon-purple)] text-2xl transition-colors duration-200 rounded hover:bg-[var(--neon-purple)]/10"
               >
