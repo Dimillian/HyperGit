@@ -68,7 +68,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen" suppressHydrationWarning>
-        {children}
+        <div className="main-background">
+          {children}
+        </div>
         <Analytics />
       </body>
     </html>

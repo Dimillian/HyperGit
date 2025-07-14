@@ -25,8 +25,8 @@
   }
 
   body {
-    @apply bg-[var(--dark-bg)] text-[var(--dark-text)] min-h-screen;
-    background: radial-gradient(ellipse at top, #1a0d2e 0%, #0f051a 40%, var(--dark-bg) 70%);
+    @apply text-[var(--dark-text)] min-h-screen;
+    background: #0E061A
   }
 
   * {
@@ -53,6 +53,11 @@
 }
 
 @layer components {
+  .main-background {
+    background: radial-gradient(ellipse at top, #1a0d2e 0%, #0f051a 40%, var(--dark-bg) 70%);
+    min-height: 100vh;
+  }
+
   .neon-glow {
     box-shadow: 0 0 5px var(--neon-purple), 0 0 10px var(--neon-purple), 0 0 15px var(--neon-purple);
   }
