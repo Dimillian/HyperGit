@@ -7,6 +7,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   themeColor: '#1a0d2e',
+  colorScheme: 'dark',
 }
 
 export const metadata: Metadata = {
