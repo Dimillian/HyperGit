@@ -17,7 +17,7 @@ export default function LoadingScreen({ loadingProgress }: LoadingScreenProps) {
     : 0
     
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--dark-bg)] via-[var(--dark-bg-secondary)] to-[var(--dark-bg)]">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'radial-gradient(ellipse at top, #1a0d2e 0%, #0f051a 40%, var(--dark-bg) 70%)' }}>
       <div className="text-center space-y-8">
         {/* HyperGit Logo with Animation */}
         <div className="flex items-center justify-center gap-3 mb-8">
