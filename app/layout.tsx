@@ -1,6 +1,13 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#1a0d2e',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hypergit.app'),
@@ -10,6 +17,11 @@ export const metadata: Metadata = {
   keywords: ['GitHub', 'file search', 'developer tools', 'code search', 'repository search'],
   icons: {
     icon: '/icon.svg',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'HyperGit',
   },
   openGraph: {
     title: 'HyperGit - Lightning Fast GitHub File Search',
