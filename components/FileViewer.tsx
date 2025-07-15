@@ -470,13 +470,6 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
             </div>
           ) : (
             <>
-              {!selectedLines && (
-                <div className="px-6 py-3 bg-[var(--neon-purple)]/10 border-b border-[var(--neon-purple)]/20">
-                  <p className="text-sm text-[var(--neon-purple)]">
-                    💡 Tip: Select lines of code to save as snippet or share as a beautiful screenshot!
-                  </p>
-                </div>
-              )}
               <div 
                 ref={codeRef}
                 onMouseUp={handleLineSelection}
@@ -488,6 +481,10 @@ export default function FileViewer({ repo, file, branch, onClose, onSnippetSaved
                   style={oneDark}
                   showLineNumbers
                   wrapLines
+                  customStyle={{
+                    borderRadius: 0,
+                    margin: 0
+                  }}
                 >
                   {content}
                 </SyntaxHighlighter>

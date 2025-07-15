@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { GitHubRepo, GitHubFile, GitHubBranch } from '@/lib/github/api'
 import { fileTreeCache } from '@/lib/github/cache'
-import { Search } from 'lucide-react'
+import { Search, FolderOpen } from 'lucide-react'
 import { useGitHub } from '@/hooks/useGitHub'
 import { useDropdownVisibility } from './SearchBar/hooks/useDropdownVisibility'
 import { useKeyboardNavigation } from './SearchBar/hooks/useKeyboardNavigation'
@@ -15,10 +15,11 @@ import { BranchDropdown } from './SearchBar/components/BranchDropdown'
 interface SearchBarProps {
   onFileSelect: (repo: GitHubRepo, file: GitHubFile, branch?: string) => void
   onRepoSelect?: (repo: GitHubRepo) => void
+  onBrowseRepo?: (repo: GitHubRepo, branch?: string) => void
 }
 
 const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => void; resetSearchBar: () => void; setSearchQuery: (query: string) => Promise<void>; inputRef: React.RefObject<HTMLInputElement | null> }, SearchBarProps>(
-  function SearchBar({ onFileSelect, onRepoSelect }, ref) {
+  function SearchBar({ onFileSelect, onRepoSelect, onBrowseRepo }, ref) {
   const [query, setQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [mode, setMode] = useState<'repos' | 'files' | 'branches'>('repos')
@@ -384,8 +385,17 @@ const SearchBar = forwardRef<{ selectRepositoryFromCard: (repo: GitHubRepo) => v
           }}
           placeholder={isAuthenticated ? "Type @repo-name or @repo-name:branch/file-path to search..." : "Please login with GitHub first"}
           disabled={!isAuthenticated}
-          className="w-full pl-12 pr-6 py-5 text-lg rounded-2xl glass-effect text-[var(--dark-text)] placeholder-[var(--dark-text-secondary)] focus:outline-none focus:border-[var(--neon-purple)] focus:neon-glow transition-all duration-300 shiny-surface"
+          className={`w-full pl-12 ${selectedRepo ? 'pr-16' : 'pr-6'} py-5 text-lg rounded-2xl glass-effect text-[var(--dark-text)] placeholder-[var(--dark-text-secondary)] focus:outline-none focus:border-[var(--neon-purple)] focus:neon-glow transition-all duration-300 shiny-surface`}
         />
+        {selectedRepo && onBrowseRepo && (
+          <button
+            onClick={() => onBrowseRepo(selectedRepo, branch || selectedRepo.default_branch)}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[var(--neon-purple)] hover:text-[var(--neon-purple-bright)] transition-colors duration-200 p-2 rounded-lg hover:bg-[var(--neon-purple)]/10"
+            title="Browse repository files"
+          >
+            <FolderOpen className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Dropdown */}

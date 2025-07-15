@@ -6,6 +6,7 @@ import { GitHubRepo, GitHubFile } from '@/lib/github/api'
 import { RecentFilesManager } from '@/lib/recentFiles'
 import SearchBar from '@/components/SearchBar'
 import FileViewer from '@/components/FileViewer'
+import FileBrowser from '@/components/FileBrowser'
 import AuthPrompt from '@/components/AuthPrompt'
 import { RecentFiles, RecentSnippets } from '@/components/Card'
 import LoadingScreen from '@/components/LoadingScreen'
@@ -15,6 +16,7 @@ import { TimePill, ShineCard, LanguageIcon } from '@/components/Card'
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<{ repo: GitHubRepo; file: GitHubFile; branch?: string } | null>(null)
+  const [selectedRepo, setSelectedRepo] = useState<{ repo: GitHubRepo; branch: string } | null>(null)
   const [recentFilesKey, setRecentFilesKey] = useState(0)
   const [recentSnippetsKey, setRecentSnippetsKey] = useState(0)
   const { isAuthenticated, repositories, clearToken, loading, isInitializing, loadingProgress } = useGitHub()
@@ -36,6 +38,10 @@ export default function Home() {
 
   const handleRepoSelect = () => {
     // This will be handled by the SearchBar component
+  }
+
+  const handleBrowseRepo = (repo: GitHubRepo, branch?: string) => {
+    setSelectedRepo({ repo, branch: branch || repo.default_branch })
   }
 
 
@@ -110,14 +116,11 @@ export default function Home() {
             <SearchBar
               onFileSelect={handleFileSelect}
               onRepoSelect={handleRepoSelect}
+              onBrowseRepo={handleBrowseRepo}
               ref={(ref) => { if (ref) window.searchBarRef = ref }}
             />
 
             <div className="mt-12 space-y-12">
-              <p className="text-[var(--dark-text-secondary)] mb-8">
-                Quick tip: Type <code className="bg-[var(--dark-bg-tertiary)] text-[var(--neon-purple)] px-2 py-1 rounded text-sm border border-[var(--neon-purple)]/30">@repo-name/filename</code> to search
-              </p>
-
               {/* Recent Repositories Section */}
               <div className="max-w-4xl mx-auto space-y-4">
                 <div className="flex items-center gap-2">
@@ -198,6 +201,16 @@ export default function Home() {
           file={selectedFile.file}
           branch={selectedFile.branch}
           onClose={() => setSelectedFile(null)}
+          onSnippetSaved={handleSnippetSaved}
+        />
+      )}
+
+      {/* File Browser Modal */}
+      {selectedRepo && (
+        <FileBrowser
+          repo={selectedRepo.repo}
+          branch={selectedRepo.branch}
+          onClose={() => setSelectedRepo(null)}
           onSnippetSaved={handleSnippetSaved}
         />
       )}
