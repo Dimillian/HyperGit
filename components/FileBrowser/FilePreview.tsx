@@ -8,15 +8,17 @@ import { useGitHub } from '@/hooks/useGitHub'
 import { Copy, CheckCircle, Camera, BookmarkPlus, ExternalLink } from 'lucide-react'
 import { RecentSnippetsManager, RecentSnippet } from '@/lib/recentSnippets'
 import SnippetViewer from '../SnippetViewer'
+import Breadcrumb from './Breadcrumb'
 
 interface FilePreviewProps {
   repo: GitHubRepo
   file: GitHubFile
   branch: string
   onSnippetSaved?: () => void
+  onNavigate?: (path: string) => void
 }
 
-export default function FilePreview({ repo, file, branch, onSnippetSaved }: FilePreviewProps) {
+export default function FilePreview({ repo, file, branch, onSnippetSaved, onNavigate }: FilePreviewProps) {
   const [content, setContent] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -233,14 +235,20 @@ export default function FilePreview({ repo, file, branch, onSnippetSaved }: File
 
   return (
     <div className="flex flex-col h-full">
+      {/* Breadcrumb Navigation */}
+      {onNavigate && (
+        <Breadcrumb
+          repositoryName={repo.name}
+          currentPath={file.path}
+          onNavigate={onNavigate}
+        />
+      )}
+      
       {/* File Header */}
       <div className="p-4 border-b border-[var(--dark-border)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h3 className="font-medium text-[var(--dark-text)]">{file.name}</h3>
-            <span className="text-sm text-[var(--dark-text-secondary)]">
-              {file.path}
-            </span>
           </div>
           
           <div className="flex items-center gap-2">

@@ -21,6 +21,7 @@
 - ✅ **Interactive Shine Effects**: Mouse-following shine effects on cards for enhanced user experience
 - ✅ **Footer Refactoring**: Created reusable Footer component for both auth and main pages
 - ✅ **File Browser Implementation**: Full-featured IDE-style file browser with sidebar tree view and file preview
+- ✅ **Breadcrumb Navigation**: Added breadcrumb navigation to FileBrowser for easy path navigation
 - ✅ **File Tree Navigation**: Recursive tree component with expand/collapse functionality for folders
 - ✅ **Integrated File Preview**: Reused existing FileViewer logic for syntax highlighting and snippet features
 - ✅ **Folder Button Integration**: Added folder browse button to SearchBar when repository is selected
@@ -69,7 +70,6 @@
 - [x] Fuzzy search improvements (integrated Fuse.js)
 - [x] Auto-scroll on keyboard navigation
 - [x] Folder browsing and navigation within repositories
-- [x] Breadcrumb navigation for folder structure
 - [x] Search bar reset when file viewer is closed
 - [ ] Advanced search filters (file type, date modified, size)
 - [ ] Search across multiple repositories simultaneously

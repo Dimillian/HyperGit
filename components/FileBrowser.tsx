@@ -21,6 +21,37 @@ export default function FileBrowser({ repo, branch, onClose, onSnippetSaved }: F
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { github } = useGitHub()
+  
+  // Helper function to find a file by path
+  const findFileByPath = (path: string, fileList: GitHubFile[]): GitHubFile | null => {
+    for (const file of fileList) {
+      if (file.path === path) {
+        return file
+      }
+    }
+    return null
+  }
+  
+  // Handle breadcrumb navigation
+  const handleNavigate = (path: string) => {
+    if (!path) {
+      // Navigate to root - clear selection
+      setSelectedFile(null)
+      return
+    }
+    
+    // Find the file or folder at this path
+    const targetFile = findFileByPath(path, files)
+    if (targetFile) {
+      if (targetFile.type === 'dir') {
+        // For directories, just clear the selection to show "Select a file to preview"
+        setSelectedFile(null)
+      } else {
+        // For files, select them
+        setSelectedFile(targetFile)
+      }
+    }
+  }
 
   useEffect(() => {
     const loadFiles = async () => {
@@ -125,6 +156,7 @@ export default function FileBrowser({ repo, branch, onClose, onSnippetSaved }: F
                 file={selectedFile}
                 branch={branch}
                 onSnippetSaved={onSnippetSaved}
+                onNavigate={handleNavigate}
               />
             ) : (
               <div className="flex items-center justify-center h-full text-[var(--dark-text-secondary)]">
